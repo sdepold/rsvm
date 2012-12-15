@@ -1,8 +1,7 @@
 before_script:
   - git clone https://github.com/sstephenson/bats.git
   - cd bats
-  - ./install.sh ../
-  - ls -ila
+  - ./install.sh ..
   - cd ..
 script:
   - bin/bats test/rsvm.sh.bats
