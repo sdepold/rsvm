@@ -4,9 +4,16 @@
 # To use the rsvm command source this file from your bash profile.
 
 # Auto detect the NVM_DIR
-if [ ! -d "$NVM_DIR" ]; then
-  export NVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
+if [ ! -d "$RSVM_DIR" ]; then
+  export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
+
+rsvm_install()
+{
+  echo -n "Creating the respective folder for rust v$1 ... "
+  mkdir -p "$RSVM_DIR/v$1"
+  echo "done"
+}
 
 rsvm()
 {
@@ -41,9 +48,7 @@ rsvm()
       then
         echo "Would install rust v$2"
       else
-        echo -n "Creating the respective folder for rust v$2 ... "
-        mkdir -p "`pwd`/v$2"
-        echo "done"
+        rsvm_install "$2"
       fi
     else
       # the version was defined in a the wrong format.
