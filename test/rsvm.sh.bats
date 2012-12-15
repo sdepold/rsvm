@@ -65,6 +65,12 @@ export RSVM_DIR=`pwd`/test/builds
   [ ${lines[3]} = "  - None" ]
 }
 
+@test "'rsvm list' will return an empty list if no versions have been installed" {
+  run rsvm list
+  [ ${lines[2]} = "Installed versions:" ]
+  [ ${lines[3]} = "  - None" ]
+}
+
 @test "'rsvm ls' will return the installed versions" {
   run rsvm_init_folder_structure 0.1
   run rsvm_init_folder_structure 0.5
