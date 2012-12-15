@@ -27,8 +27,12 @@ then
     echo "  rsvm install 0.4"
   elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
   then
-    # the version has the right format!
-    echo 'fnord'
+    if [ "$3" = "--dry" ]
+    then
+      echo "Would install rust v$2"
+    else
+      echo "bla"
+    fi
   else
     # the version was defined in a the wrong format.
     echo "You defined a version of rust in a wrong format!"
