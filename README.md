@@ -2,6 +2,17 @@
 
 A version manager for rust.
 
+## Installation
+
+```console
+curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+```
+
+or
+
+```console
+wget -qO- https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+```
 
 ## Running the tests
 
@@ -18,11 +29,4 @@ Inside the rsvm repository do this:
 ```console
 bats test/rsvm.sh.bats
 ```
-
-
-
-
-
-## bla
-ln -fs /Users/sdepold/Projects/rsvm/rsvm.sh /usr/local/bin/rsvm
 
