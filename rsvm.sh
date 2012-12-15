@@ -8,17 +8,40 @@ if [ ! -d "$RSVM_DIR" ]; then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
 
-rsvm_install()
+rsvm_ls()
 {
-  current_dir=`pwd`
+  directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
 
+  echo "Installed versions:"
+  echo ""
+
+  if [ `grep -o "v" <<< "$directories" | wc -l` = 0 ]
+  then
+    echo '  - None';
+  else
+    for line in $(echo $directories | tr " " "\n")
+    do
+      echo "  - $line"
+    done
+  fi
+
+}
+
+rsvm_init_folder_structure()
+{
   echo -n "Creating the respective folders for rust v$1 ... "
 
   mkdir -p "$RSVM_DIR/v$1/src"
   mkdir -p "$RSVM_DIR/v$1/dist"
 
   echo "done"
+}
 
+rsvm_install()
+{
+  current_dir=`pwd`
+
+  rsvm_init_folder_structure $1
   cd "$RSVM_DIR/v$1/src"
 
   if [ -f "rust-$1.tar.gz" ]
@@ -72,43 +95,45 @@ rsvm()
   echo '===================='
   echo ''
 
-  # request for help or no parameter at all?
-  # print the help
-  if ([ -z "$1" ] || [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ])
-  then
-    echo 'Usage:'
-    echo ''
-    echo '  rsvm help | --help | -h       Show this message.'
-    echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.4".'
-    echo '  rsvm uninstall <version>      Uninstall a <version>.'
-    echo '  rsvm use <version>            Activate <version> for now and the future.'
-    echo '  rsvm ls | list                List all installed versions of rust.'
-  elif [ "$1" = "install" ]
-  then
-    if [ -z "$2" ]
-    then
-      # whoops. no version found!
-      echo "Please define a version of rust!"
-      echo ""
-      echo "Example:"
-      echo "  rsvm install 0.4"
-    elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
-    then
-      if [ "$3" = "--dry" ]
+  case $1 in
+    ""|help|--help|-h)
+      echo 'Usage:'
+      echo ''
+      echo '  rsvm help | --help | -h       Show this message.'
+      echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.4".'
+      echo '  rsvm uninstall <version>      Uninstall a <version>.'
+      echo '  rsvm use <version>            Activate <version> for now and the future.'
+      echo '  rsvm ls | list                List all installed versions of rust.'
+      ;;
+    install)
+      if [ -z "$2" ]
       then
-        echo "Would install rust v$2"
+        # whoops. no version found!
+        echo "Please define a version of rust!"
+        echo ""
+        echo "Example:"
+        echo "  rsvm install 0.4"
+      elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
+      then
+        if [ "$3" = "--dry" ]
+        then
+          echo "Would install rust v$2"
+        else
+          rsvm_install "$2"
+        fi
       else
-        rsvm_install "$2"
+        # the version was defined in a the wrong format.
+        echo "You defined a version of rust in a wrong format!"
+        echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
+        echo ""
+        echo "Example:"
+        echo "  rsvm install 0.4"
       fi
-    else
-      # the version was defined in a the wrong format.
-      echo "You defined a version of rust in a wrong format!"
-      echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
-      echo ""
-      echo "Example:"
-      echo "  rsvm install 0.4"
-    fi
-  fi
+      ;;
+    ls|list)
+      rsvm_ls
+      ;;
+  esac
 
   echo ''
 }
