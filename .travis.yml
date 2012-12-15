@@ -5,5 +5,5 @@ before_script:
   - ls -ila
   - cd ..
 script:
-  - bats test/rsvm.sh.bats
+  - bin/bats test/rsvm.sh.bats
 
