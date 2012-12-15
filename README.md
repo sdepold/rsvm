@@ -52,6 +52,17 @@ curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh
 source ~/.rsvm/rsvm.sh
 rsvm install 0.4
 rsvm use 0.4
+
+# you will now be able to access the rust binaries:
+~ ∴ rustc -v
+rustc 0.4
+host: x86_64-apple-darwin
+
+~ ∴ cargo -h
+Usage: cargo <cmd> [options] [args..]
+
+~ ∴ rustdoc -h
+Usage: rustdoc [options] <cratefile>
 ```
 
 ## Running the tests
