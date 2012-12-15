@@ -33,6 +33,12 @@ rsvm_use()
   fi
 }
 
+rsvm_current()
+{
+  target=`echo echo $(readlink .rsvm/current)|tr "/" "\n"`
+  echo ${target[@]} | awk '{print$NF}'
+}
+
 rsvm_ls()
 {
   directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
@@ -42,11 +48,16 @@ rsvm_ls()
 
   if [ `grep -o "v" <<< "$directories" | wc -l` = 0 ]
   then
-    echo '  - None';
+    echo '  -  None';
   else
     for line in $(echo $directories | tr " " "\n")
     do
-      echo "  - $line"
+      if [ `rsvm_current` = "$line" ]
+      then
+        echo "  =>  $line"
+      else
+        echo "  -   $line"
+      fi
     done
   fi
 }
