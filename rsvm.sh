@@ -4,8 +4,14 @@
 # To use the rsvm command source this file from your bash profile.
 
 # Auto detect the NVM_DIR
-if [ ! -d "$RSVM_DIR" ]; then
+if [ ! -d "$RSVM_DIR" ]
+then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
+fi
+
+if [ -e "$RSVM_DIR/current/dist/bin" ]
+then
+  PATH=$RSVM_DIR/current/dist/bin:$PATH
 fi
 
 rsvm_use()
@@ -13,7 +19,9 @@ rsvm_use()
   if [ -e "$RSVM_DIR/v$1" ]
   then
     echo -n "Activating rust v$1 ... "
-
+    rm $RSVM_DIR/current
+    ln -s $RSVM_DIR/v$1 $RSVM_DIR/current
+    source $RSVM_DIR/rsvm.sh
     echo "done"
   else
     echo "The specified version v$1 of rust is not installed..."
