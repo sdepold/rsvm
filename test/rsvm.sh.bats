@@ -1,6 +1,10 @@
 #!/usr/bin/env bats
 
+# load the rsvm
 source ./rsvm.sh
+
+# override the RSVM_DIR
+export RSVM_DIR=`pwd`/test/builds
 
 @test "'rsvm' prints the help" {
   run rsvm
@@ -53,4 +57,10 @@ source ./rsvm.sh
 @test "'rsvm install 0.4.1' is not complaining" {
   run rsvm install 0.4.1 --dry
   [ ${lines[2]} = "Would install rust v0.4.1" ]
+}
+
+@test "'rsvm ls' will return an empty list of installed versions" {
+  run rsvm ls
+  [ ${lines[2]} = "Installed versions:" ]
+  [ ${lines[3]} = "  - None" ]
 }
