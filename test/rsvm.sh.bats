@@ -98,3 +98,10 @@ export RSVM_DIR=`pwd`/test/builds
   [ ${lines[3]} = "You might want to install it with the following command:" ]
   [ ${lines[4]} = "rsvm install 0.1" ]
 }
+
+@test "'rsvm use 0.1' will activate the right version" {
+  run rsvm_init_folder_structure 0.1
+  run rsvm use 0.1
+  [ ${lines[2]} = "Activating rust v0.1 ... done" ]
+  rm -rf $RSVM_DIR/v*
+}
