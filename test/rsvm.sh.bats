@@ -59,8 +59,20 @@ export RSVM_DIR=`pwd`/test/builds
   [ ${lines[2]} = "Would install rust v0.4.1" ]
 }
 
-@test "'rsvm ls' will return an empty list of installed versions" {
+@test "'rsvm ls' will return an empty list if no versions have been installed" {
   run rsvm ls
   [ ${lines[2]} = "Installed versions:" ]
   [ ${lines[3]} = "  - None" ]
+}
+
+@test "'rsvm ls' will return the installed versions" {
+  run rsvm_init_folder_structure 0.1
+  run rsvm_init_folder_structure 0.5
+
+  run rsvm ls
+  [ ${lines[2]} = "Installed versions:" ]
+  [ ${lines[3]} = "  - v0.1" ]
+  [ ${lines[4]} = "  - v0.5" ]
+
+  rm -rf $RSVM_DIR/v*
 }
