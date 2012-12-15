@@ -10,9 +10,59 @@ fi
 
 rsvm_install()
 {
-  echo -n "Creating the respective folder for rust v$1 ... "
-  mkdir -p "$RSVM_DIR/v$1"
+  current_dir=`pwd`
+
+  echo -n "Creating the respective folders for rust v$1 ... "
+
+  mkdir -p "$RSVM_DIR/v$1/src"
+  mkdir -p "$RSVM_DIR/v$1/dist"
+
   echo "done"
+
+  cd "$RSVM_DIR/v$1/src"
+
+  if [ -f "rust-$1.tar.gz" ]
+  then
+    echo "Sources for rust v$1 already downloaded ..."
+  else
+    echo -n "Downloading sources for rust v$1 ... "
+    wget -q "http://dl.rust-lang.org/dist/rust-$1.tar.gz"
+    echo "done"
+  fi
+
+  if [ -e "rust-$1" ]
+  then
+    echo "Sources for rust v$1 already extracted ..."
+  else
+    echo -n "Extracting source ... "
+    tar -xzf "rust-$1.tar.gz"
+    echo "done"
+  fi
+
+  cd "rust-$1"
+
+  echo ""
+  echo "Configuring rust v$1. This will take some time. Grep a beer and sit tight."
+  echo ""
+
+  sleep 5
+
+  ./configure --prefix="$RSVM_DIR/v$1/src/rust-$1" --local-rust-root="$RSVM_DIR/v$1/src/rust-$1"
+
+  echo ""
+  echo "Still awake? Cool. Configuration is done."
+  echo ""
+  echo "Building rust v$1. This will take even more time. See you later ... "
+  echo ""
+
+  sleep 5
+
+  make && make install
+
+  echo ""
+  echo "And we are done. Have fun using rust v$1."
+
+  cd $current_dir
 }
 
 rsvm()
