@@ -4,11 +4,16 @@
 source ./rsvm.sh
 
 # override the RSVM_DIR
-export RSVM_DIR=`pwd`/test/builds
+export RSVM_DIR=`pwd`
+
+cleanup()
+{
+  rm -rf `pwd`/v*
+  rm -rf `pwd`/current
+}
 
 @test "'rsvm' prints the help" {
   run rsvm
-  echo ${lines[0]}
   [ ${lines[0]} = "Rust Version Manager" ]
   [ ${lines[2]} = "Usage:" ]
   [ ${lines[3]} = "  rsvm help | --help | -h       Show this message." ]
@@ -80,7 +85,7 @@ export RSVM_DIR=`pwd`/test/builds
   [ ${lines[3]} = "  - v0.1" ]
   [ ${lines[4]} = "  - v0.5" ]
 
-  rm -rf $RSVM_DIR/v*
+  cleanup
 }
 
 @test "'rsvm use' will notify the user about missing version" {
@@ -103,5 +108,5 @@ export RSVM_DIR=`pwd`/test/builds
   run rsvm_init_folder_structure 0.1
   run rsvm use 0.1
   [ ${lines[2]} = "Activating rust v0.1 ... done" ]
-  rm -rf $RSVM_DIR/v*
+  cleanup
 }

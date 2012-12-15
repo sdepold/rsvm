@@ -19,9 +19,11 @@ rsvm_use()
   if [ -e "$RSVM_DIR/v$1" ]
   then
     echo -n "Activating rust v$1 ... "
-    rm $RSVM_DIR/current
+
+    rm -rf $RSVM_DIR/current
     ln -s $RSVM_DIR/v$1 $RSVM_DIR/current
     source $RSVM_DIR/rsvm.sh
+
     echo "done"
   else
     echo "The specified version v$1 of rust is not installed..."
