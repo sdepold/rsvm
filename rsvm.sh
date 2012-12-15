@@ -8,6 +8,19 @@ if [ ! -d "$RSVM_DIR" ]; then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
 
+rsvm_use()
+{
+  if [ -e "$RSVM_DIR/v$1" ]
+  then
+    echo "Let's use $1"
+  else
+    echo "The specified version v$1 of rust is not installed..."
+    echo "You might want to install it with the following command:"
+    echo ""
+    echo "rsvm install $1"
+  fi
+}
+
 rsvm_ls()
 {
   directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
@@ -24,7 +37,6 @@ rsvm_ls()
       echo "  - $line"
     done
   fi
-
 }
 
 rsvm_init_folder_structure()
@@ -132,6 +144,26 @@ rsvm()
       ;;
     ls|list)
       rsvm_ls
+      ;;
+    use)
+      if [ -z "$2" ]
+      then
+        # whoops. no version found!
+        echo "Please define a version of rust!"
+        echo ""
+        echo "Example:"
+        echo "  rsvm use 0.4"
+      elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
+      then
+        rsvm_use "$2"
+      else
+        # the version was defined in a the wrong format.
+        echo "You defined a version of rust in a wrong format!"
+        echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
+        echo ""
+        echo "Example:"
+        echo "  rsvm use 0.4"
+      fi
       ;;
   esac
 

@@ -82,3 +82,19 @@ export RSVM_DIR=`pwd`/test/builds
 
   rm -rf $RSVM_DIR/v*
 }
+
+@test "'rsvm use' will notify the user about missing version" {
+  run rsvm use
+  [ ${lines[2]} = "Please define a version of rust!" ]
+}
+
+@test "'rsvm use' will notify the user about a malformed version" {
+  run rsvm use 1.1.1.1.1
+  [ ${lines[2]} = "You defined a version of rust in a wrong format!" ]
+}
+
+@test "'rsvm use 0.1' will notify the user about a not installed version" {
+  run rsvm use 0.1
+  [ ${lines[3]} = "You might want to install it with the following command:" ]
+  [ ${lines[4]} = "rsvm install 0.1" ]
+}
