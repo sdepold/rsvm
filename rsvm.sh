@@ -3,6 +3,8 @@
 #
 # To use the rsvm command source this file from your bash profile.
 
+RSVM_VERSION="0.1.0"
+
 # Auto detect the NVM_DIR
 if [ ! -d "$RSVM_DIR" ]
 then
@@ -136,9 +138,11 @@ rsvm()
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
       echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.4".'
-      echo '  rsvm uninstall <version>      Uninstall a <version>.'
+      # echo '  rsvm uninstall <version>      Uninstall a <version>.'
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
+      echo ''
+      echo "Current version: $RSVM_VERSION"
       ;;
     install)
       if [ -z "$2" ]
