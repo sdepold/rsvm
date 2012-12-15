@@ -42,12 +42,12 @@ rsvm_install()
   cd "rust-$1"
 
   echo ""
-  echo "Configuring rust v$1. This will take some time. Grep a beer and sit tight."
+  echo "Configuring rust v$1. This will take some time. Grep a beer in the meantime."
   echo ""
 
   sleep 5
 
-  ./configure --prefix="$RSVM_DIR/v$1/src/rust-$1" --local-rust-root="$RSVM_DIR/v$1/src/rust-$1"
+  ./configure --prefix=$RSVM_DIR/v$1/dist --local-rust-root=$RSVM_DIR/v$1/dist
 
   echo ""
   echo "Still awake? Cool. Configuration is done."
