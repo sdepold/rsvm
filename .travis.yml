@@ -5,3 +5,4 @@ before_script:
   - cd ..
 script:
   - bats test/rsvm.sh.bats
+
