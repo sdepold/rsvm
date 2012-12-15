@@ -21,20 +21,20 @@ Show the help messages. Choose the one that you like most.
 ```console
 rsvm help
 rsvm --help
-rsvm-h
+rsvm -h
 ```
 
-Download and install a <version>. <version> could be for example "0.4".
+Download and install a &lt;version&rt;. &lt;version&rt; could be for example "0.4".
 
 ```console
-rsvm install <version>
+rsvm install &lt;version&rt;
 e.g.: rsvm install 0.4
 ```
 
-Activate <version> for now and the future.
+Activate &lt;version&rt; for now and the future.
 
 ```console
-rsvm use <version>
+rsvm use &lt;version&rt;
 e.g. rsvm use 0.4
 ```
 
