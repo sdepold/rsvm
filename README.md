@@ -24,17 +24,17 @@ rsvm --help
 rsvm -h
 ```
 
-Download and install a &lt;version&rt;. &lt;version&rt; could be for example "0.4".
+Download and install a &lt;version&gt;. &lt;version&gt; could be for example "0.4".
 
 ```console
-rsvm install &lt;version&rt;
+rsvm install &lt;version&gt;
 e.g.: rsvm install 0.4
 ```
 
-Activate &lt;version&rt; for now and the future.
+Activate &lt;version&gt; for now and the future.
 
 ```console
-rsvm use &lt;version&rt;
+rsvm use &lt;version&gt;
 e.g. rsvm use 0.4
 ```
 
