@@ -27,14 +27,14 @@ rsvm -h
 Download and install a &lt;version&gt;. &lt;version&gt; could be for example "0.4".
 
 ```console
-rsvm install &lt;version&gt;
+rsvm install <version>
 e.g.: rsvm install 0.4
 ```
 
 Activate &lt;version&gt; for now and the future.
 
 ```console
-rsvm use &lt;version&gt;
+rsvm use <version>
 e.g. rsvm use 0.4
 ```
 
