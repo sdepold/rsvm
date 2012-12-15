@@ -45,6 +45,15 @@ rsvm ls
 rsvm list
 ```
 
+## Example: Install 0.4
+
+```console
+curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+source ~/.rsvm/rsvm.sh
+rsvm install 0.4
+rsvm use 0.4
+```
+
 ## Running the tests
 
 RSVM is tested with bats. Install like this:
