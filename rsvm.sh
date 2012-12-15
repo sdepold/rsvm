@@ -144,6 +144,9 @@ rsvm()
       echo ''
       echo "Current version: $RSVM_VERSION"
       ;;
+    --version|-v)
+      echo "v$RSVM_VERSION"
+      ;;
     install)
       if [ -z "$2" ]
       then
