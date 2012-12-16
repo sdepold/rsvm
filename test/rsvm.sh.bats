@@ -111,11 +111,6 @@ function assert()
   run rsvm_init_folder_structure 0.1
   run rsvm_init_folder_structure 0.5
 
-  ls -ila `pwd`
-  directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
-  echo "$RSVM_DIR"
-  echo "$directories"
-
   run rsvm ls
   assert ${lines[2]} "Installed versions:"
   assert ${lines[3]} "  -   v0.1"
