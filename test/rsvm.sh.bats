@@ -86,6 +86,8 @@ assert()
   run rsvm_init_folder_structure 0.1
   run rsvm_init_folder_structure 0.5
 
+  ls -ila `pwd`
+
   run rsvm ls
   assert ${lines[2]} "Installed versions:"
   assert ${lines[3]} "  -   v0.1"
