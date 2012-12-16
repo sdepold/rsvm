@@ -81,3 +81,6 @@ Inside the rsvm repository do this:
 bats test/rsvm.sh.bats
 ```
 
+## License
+
+Hereby placed under MIT license.
