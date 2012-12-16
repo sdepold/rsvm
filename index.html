@@ -28,32 +28,79 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>Welcome to GitHub Pages.</h3>
+          <h1>rsvm</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>A version manager for rust.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+<h2>Installation</h2>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<div class="highlight"><pre><span class="go">curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh</span>
+</pre></div>
 
-<h3>Designer Templates</h3>
+<p>or</p>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<div class="highlight"><pre><span class="go">wget -qO- https://raw.github.com/sdepold/rsvm/master/install.sh | sh</span>
+</pre></div>
 
-<h3>Rather Drive Stick?</h3>
+<h2>Usage</h2>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>Show the help messages. Choose the one that you like most.</p>
 
-<h3>Authors and Contributors</h3>
+<div class="highlight"><pre><span class="go">rsvm help</span>
+<span class="go">rsvm --help</span>
+<span class="go">rsvm -h</span>
+</pre></div>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>Download and install a &lt;version&gt;. &lt;version&gt; could be for example "0.4".</p>
 
-<h3>Support or Contact</h3>
+<div class="highlight"><pre><span class="go">rsvm install &lt;version&gt;</span>
+<span class="go">e.g.: rsvm install 0.4</span>
+</pre></div>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p>Activate &lt;version&gt; for now and the future.</p>
+
+<div class="highlight"><pre><span class="go">rsvm use &lt;version&gt;</span>
+<span class="go">e.g. rsvm use 0.4</span>
+</pre></div>
+
+<p>List all installed versions of rust. Choose the one that you like most.</p>
+
+<div class="highlight"><pre><span class="go">rsvm ls</span>
+<span class="go">rsvm list</span>
+</pre></div>
+
+<h2>Example: Install 0.4</h2>
+
+<div class="highlight"><pre><span class="go">curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh</span>
+<span class="go">source ~/.rsvm/rsvm.sh</span>
+<span class="go">rsvm install 0.4</span>
+<span class="go">rsvm use 0.4</span>
+
+<span class="gp">#</span> you will now be able to access the rust binaries:
+<span class="go">~ ∴ rustc -v</span>
+<span class="go">rustc 0.4</span>
+<span class="go">host: x86_64-apple-darwin</span>
+
+<span class="go">~ ∴ cargo -h</span>
+<span class="go">Usage: cargo &lt;cmd&gt; [options] [args..]</span>
+
+<span class="go">~ ∴ rustdoc -h</span>
+<span class="go">Usage: rustdoc [options] &lt;cratefile&gt;</span>
+</pre></div>
+
+<h2>Running the tests</h2>
+
+<p>RSVM is tested with bats. Install like this:</p>
+
+<div class="highlight"><pre><span class="go">git clone https://github.com/sstephenson/bats.git</span>
+<span class="go">cd bats</span>
+<span class="go">./install.sh /usr/local</span>
+</pre></div>
+
+<p>Inside the rsvm repository do this:</p>
+
+<div class="highlight"><pre><span class="go">bats test/rsvm.sh.bats</span>
+</pre></div>
         </section>
 
         <aside id="sidebar">
