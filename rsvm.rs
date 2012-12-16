@@ -33,4 +33,5 @@ fn print_help() {
     io::println("  rsvm ls | list                List all installed versions of rust.");
     io::println("");
     io::println(~"Current version: " + VERSION);
+    io::println("");
 }
