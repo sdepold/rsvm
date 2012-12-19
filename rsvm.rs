@@ -23,7 +23,7 @@ fn main() {
       }
 
       _ => {
-        print_help()
+        print_help();
       }
     }
 }
@@ -50,11 +50,11 @@ fn print_help() {
     io::println("");
 }
 
-fn is_number(c: u8) -> bool {
+pure fn is_number(c: u8) -> bool {
     c >= 48 && c <= 57
 }
 
-fn is_valid_version_format(s: & str) -> bool {
+pure fn is_valid_version_format(s: & str) -> bool {
     if s.len() == 3 {
         is_number(s[0]) && s[1] == 46 && is_number(s[2])
     } else if s.len() == 5 {
@@ -82,7 +82,7 @@ fn install() {
         if os::args().len() == 4 && os::args()[3] == ~"--dry" {
             io::println(~"Would install rust v" + version);
         } else {
-            // install
+            install_version(version);
         }
     } else {
         io::println("You defined a version of rust in a wrong format!");
@@ -93,4 +93,65 @@ fn install() {
     }
 
     io::println("");
+}
+
+fn create_folders_for_version(version: & str) {
+    io::println("Creating the respective folders for rust v$1 ... ");
+
+    core::run::run_program("mkdir", [~"-p", ~"'$RSVM_DIR/v" + version + "/src'"]);
+    core::run::run_program("mkdir", [~"-p", ~"'$RSVM_DIR/v" + version + "/dist'"]);
+
+    io::println("done");
+}
+
+fn install_version(version: & str) {
+    create_folders_for_version(version);
+
+  //   current_dir=`pwd`
+
+  // rsvm_init_folder_structure $1
+  // cd "$RSVM_DIR/v$1/src"
+
+  // if [ -f "rust-$1.tar.gz" ]
+  // then
+  //   echo "Sources for rust v$1 already downloaded ..."
+  // else
+  //   echo -n "Downloading sources for rust v$1 ... "
+  //   wget -q "http://dl.rust-lang.org/dist/rust-$1.tar.gz"
+  //   echo "done"
+  // fi
+
+  // if [ -e "rust-$1" ]
+  // then
+  //   echo "Sources for rust v$1 already extracted ..."
+  // else
+  //   echo -n "Extracting source ... "
+  //   tar -xzf "rust-$1.tar.gz"
+  //   echo "done"
+  // fi
+
+  // cd "rust-$1"
+
+  // echo ""
+  // echo "Configuring rust v$1. This will take some time. Grep a beer in the meantime."
+  // echo ""
+
+  // sleep 5
+
+  // ./configure --prefix=$RSVM_DIR/v$1/dist --local-rust-root=$RSVM_DIR/v$1/dist
+
+  // echo ""
+  // echo "Still awake? Cool. Configuration is done."
+  // echo ""
+  // echo "Building rust v$1. This will take even more time. See you later ... "
+  // echo ""
+
+  // sleep 5
+
+  // make && make install
+
+  // echo ""
+  // echo "And we are done. Have fun using rust v$1."
+
+  // cd $current_dir
 }
