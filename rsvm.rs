@@ -1,15 +1,17 @@
 const VERSION: &static/str = "0.0.1";
 
+use core::*;
+
 fn main() {
-    let command = if os::args().len() == 1 { ~"" } else { os::args()[1] };
+    let command: ~str = if os::args().len() == 1 { ~"" } else { copy os::args()[1] };
 
     match command {
       ~"--version" | ~"-v" => {
-        io::println(~"rsvm " + VERSION)
+        io::println(~"rsvm " + VERSION);
       }
 
       ~"i" | ~"install" => {
-        install()
+        install();
       }
 
       ~"ls" | ~"list" => {
@@ -63,7 +65,11 @@ fn is_valid_version_format(s: & str) -> bool {
 }
 
 fn install() {
-    let version = if os::args().len() == 2 { ~"" } else { os::args()[2] };
+    let version: ~str = if os::args().len() == 2 {
+        ~""
+    } else {
+        copy os::args()[2]
+    };
 
     print_teaser();
 
