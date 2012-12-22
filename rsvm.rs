@@ -141,12 +141,21 @@ fn install_version(version: & str) {
     io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
 
     run::run_program("sleep", [ ~"5" ]);
-    run::run_program(uncompressed_src_path.to_str() + ~"/configure", [
+    let output = run::program_output(uncompressed_src_path.to_str() + ~"/configure", [
         ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
         ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
     ]);
 
+    if output.status != 0 {
+        io::println("Hmm, an error occurred ...");
+        io::println(output.out);
+        io::println(output.err);
+        os::set_exit_status(output.status);
+        return;
+    }
+
     io::println("Still awake? Cool. Configuration is done.");
+
   // echo
   // echo ""
   // echo "Building rust v$1. This will take even more time. See you later ... "
