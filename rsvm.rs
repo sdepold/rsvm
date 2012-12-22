@@ -1,6 +1,6 @@
-const VERSION: &static/str = "0.0.1";
-
 use core::*;
+
+const VERSION: &static/str = "0.0.1";
 
 fn main() {
     let command: ~str = if os::args().len() == 1 { ~"" } else { copy os::args()[1] };
@@ -64,6 +64,14 @@ pure fn is_valid_version_format(s: & str) -> bool {
     }
 }
 
+fn get_rsvm_directory() -> ~str {
+    os::homedir().unwrap().to_str() + "/.rsvm"
+}
+
+fn get_rsvm_version_directory(version: & str) -> ~str {
+     get_rsvm_directory() + "/v" + version
+}
+
 fn install() {
     let version: ~str = if os::args().len() == 2 {
         ~""
@@ -96,52 +104,50 @@ fn install() {
 }
 
 fn create_folders_for_version(version: & str) {
-    io::println("Creating the respective folders for rust v$1 ... ");
-
-    core::run::run_program("mkdir", [~"-p", ~"'$RSVM_DIR/v" + version + "/src'"]);
-    core::run::run_program("mkdir", [~"-p", ~"'$RSVM_DIR/v" + version + "/dist'"]);
-
+    io::print(~"Creating the respective folders for rust v" + version + ~" ... ");
+    run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/src"]);
+    run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/dist"]);
     io::println("done");
 }
 
 fn install_version(version: & str) {
     create_folders_for_version(version);
 
-  //   current_dir=`pwd`
+    let compressed_src_path   = Path(get_rsvm_version_directory(version) + "/src/rust-" + version + ".tar.gz");
+    let uncompressed_src_path = Path(get_rsvm_version_directory(version) + "/src/rust-" + version);
 
-  // rsvm_init_folder_structure $1
-  // cd "$RSVM_DIR/v$1/src"
+    if compressed_src_path.exists() {
+        io::println(~"Sources for rust v" + version + ~" already downloaded ...");
+    } else {
+        io::print(~"Downloading sources for rust v" + version + ~" ... ");
+        run::run_program("wget", [
+            ~"-q", ~"http://dl.rust-lang.org/dist/rust-" + version + ".tar.gz",
+            ~"-O", compressed_src_path.to_str()
+        ]);
+        io::println("done");
+    }
 
-  // if [ -f "rust-$1.tar.gz" ]
-  // then
-  //   echo "Sources for rust v$1 already downloaded ..."
-  // else
-  //   echo -n "Downloading sources for rust v$1 ... "
-  //   wget -q "http://dl.rust-lang.org/dist/rust-$1.tar.gz"
-  //   echo "done"
-  // fi
+    if uncompressed_src_path.exists() {
+        io::println(~"Sources for rust v" + version + ~" already extracted ...");
+    } else {
+        io::print("Extracting sources ... ");
+        run::run_program("tar", [
+            ~"-C", get_rsvm_version_directory(version) + "/src",
+            ~"-xzf", compressed_src_path.to_str()
+        ]);
+        io::println("done");
+    }
 
-  // if [ -e "rust-$1" ]
-  // then
-  //   echo "Sources for rust v$1 already extracted ..."
-  // else
-  //   echo -n "Extracting source ... "
-  //   tar -xzf "rust-$1.tar.gz"
-  //   echo "done"
-  // fi
+    io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
 
-  // cd "rust-$1"
+    run::run_program("sleep", [ ~"5" ])
+    run::run_program(uncompressed_src_path.to_str() + ~"/configure", [
+        ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
+        ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
+    ]);
 
-  // echo ""
-  // echo "Configuring rust v$1. This will take some time. Grep a beer in the meantime."
-  // echo ""
-
-  // sleep 5
-
-  // ./configure --prefix=$RSVM_DIR/v$1/dist --local-rust-root=$RSVM_DIR/v$1/dist
-
-  // echo ""
-  // echo "Still awake? Cool. Configuration is done."
+    io::println("Still awake? Cool. Configuration is done.");
+  // echo
   // echo ""
   // echo "Building rust v$1. This will take even more time. See you later ... "
   // echo ""
