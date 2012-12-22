@@ -138,10 +138,10 @@ fn install_version(version: & str) {
         io::println("done");
     }
 
+    io::println("");
     io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
 
-    run::run_program("sleep", [ ~"5" ]);
-    let output = run::program_output(uncompressed_src_path.to_str() + ~"/configure", [
+    let mut output = run::program_output(uncompressed_src_path.to_str() + ~"/configure", [
         ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
         ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
     ]);
@@ -156,17 +156,30 @@ fn install_version(version: & str) {
 
     io::println("Still awake? Cool. Configuration is done.");
 
-  // echo
-  // echo ""
-  // echo "Building rust v$1. This will take even more time. See you later ... "
-  // echo ""
+    io::println("");
+    io::println(~"Building rust v" + version + ~". This will take even more time. See you later ... ");
 
-  // sleep 5
+    output = run::program_output("make", [
+        ~"-C", uncompressed_src_path.to_str()
+    ]);
 
-  // make && make install
+    if output.status != 0 {
+        io::println("Hmm, an error occurred while running 'make' ...");
+        io::println(output.out);
+        io::println(output.err);
+        os::set_exit_status(output.status);
+        return;
+    }
 
-  // echo ""
-  // echo "And we are done. Have fun using rust v$1."
+    output = run::program_output("make", [ ~"-C", uncompressed_src_path.to_str(), ~"install" ]);
 
-  // cd $current_dir
+    if output.status != 0 {
+        io::println("Hmm, an error occurred while running 'make install' ...");
+        io::println(output.out);
+        io::println(output.err);
+        os::set_exit_status(output.status);
+        return;
+    }
+
+    io::println("And we are done. Have fun using rust v$1.");
 }
