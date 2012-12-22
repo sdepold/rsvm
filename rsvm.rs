@@ -117,10 +117,11 @@ fn install_version(version: & str) {
 
     create_folders_for_version(version);
 
+    io::print(~"Downloading sources for rust v" + version + ~" ... ");
+
     if compressed_src_path.exists() {
-        io::println(~"Sources for rust v" + version + ~" already downloaded ...");
+        io::println(~"already done");
     } else {
-        io::print(~"Downloading sources for rust v" + version + ~" ... ");
         run::run_program("wget", [
             ~"-q", ~"http://dl.rust-lang.org/dist/rust-" + version + ".tar.gz",
             ~"-O", compressed_src_path.to_str()
@@ -128,10 +129,11 @@ fn install_version(version: & str) {
         io::println("done");
     }
 
+    io::print("Extracting sources ... ");
+
     if uncompressed_src_path.exists() {
-        io::println(~"Sources for rust v" + version + ~" already extracted ...");
+        io::println(~"already done");
     } else {
-        io::print("Extracting sources ... ");
         run::run_program("tar", [
             ~"-C", get_rsvm_version_directory(version) + "/src",
             ~"-xzf", compressed_src_path.to_str()
@@ -139,8 +141,7 @@ fn install_version(version: & str) {
         io::println("done");
     }
 
-    io::println("");
-    io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
+    io::print(~"Configuring rust v" + version + ~" ... ");
 
     os::change_dir(&uncompressed_src_path);
 
@@ -153,22 +154,21 @@ fn install_version(version: & str) {
     );
 
     if output.status != 0 {
-        io::println("Hmm, an error occurred ...");
+        io::println("failed");
         io::println(output.out);
         io::println(output.err);
         os::set_exit_status(output.status);
         return;
     }
 
-    io::println("Still awake? Cool. Configuration is done.");
+    io::println("done");
 
-    io::println("");
-    io::println(~"Building rust v" + version + ~". This will take even more time. See you later ... ");
+    io::println(~"Building rust v" + version + ~" ... ");
 
     output = run::program_output("make", []);
 
     if output.status != 0 {
-        io::println("Hmm, an error occurred while running 'make' ...");
+        io::println("failed (make)");
         io::println(output.out);
         io::println(output.err);
         os::set_exit_status(output.status);
@@ -178,14 +178,14 @@ fn install_version(version: & str) {
     output = run::program_output("make", [ ~"install" ]);
 
     if output.status != 0 {
-        io::println("Hmm, an error occurred while running 'make install' ...");
+        io::println("failed (make install)");
         io::println(output.out);
         io::println(output.err);
         os::set_exit_status(output.status);
         return;
     }
 
-    io::println("And we are done. Have fun using rust v$1.");
+    io::println("done");
 
     os::change_dir(&current_dir);
 }
