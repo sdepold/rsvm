@@ -104,7 +104,7 @@ fn install() {
 }
 
 fn create_folders_for_version(version: & str) {
-    io::print(~"Creating the respective folders for rust v" + version + ~" ... ");
+    io::print(~"Creating the respective folders for rust v" + version + ~" ........ ");
     run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/src"]);
     run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/dist"]);
     io::println("done");
@@ -117,7 +117,7 @@ fn install_version(version: & str) {
 
     create_folders_for_version(version);
 
-    io::print(~"Downloading sources for rust v" + version + ~" ... ");
+    io::print(~"Downloading sources for rust v" + version + ~" .................... ");
 
     if compressed_src_path.exists() {
         io::println(~"already done");
@@ -129,19 +129,19 @@ fn install_version(version: & str) {
         io::println("done");
     }
 
-    io::print("Extracting sources ... ");
+    io::print("Extracting sources ................................... ");
 
     if uncompressed_src_path.exists() {
         io::println(~"already done");
     } else {
-        run::run_program("tar", [
-            ~"-C", get_rsvm_version_directory(version) + "/src",
-            ~"-xzf", compressed_src_path.to_str()
-        ]);
+        // run::run_program("tar", [
+        //     ~"-C", get_rsvm_version_directory(version) + "/src",
+        //     ~"-xzf", compressed_src_path.to_str()
+        // ]);
         io::println("done");
     }
 
-    io::print(~"Configuring rust v" + version + ~" ... ");
+    io::print(~"Configuring rust v" + version + ~" (might take a minute or two) ... ");
 
     os::change_dir(&uncompressed_src_path);
 
@@ -163,7 +163,7 @@ fn install_version(version: & str) {
 
     io::println("done");
 
-    io::println(~"Building rust v" + version + ~" ... ");
+    io::println(~"Building rust v" + version + ~" (can take up to an hour) .......... ");
 
     output = run::program_output("make", []);
 
