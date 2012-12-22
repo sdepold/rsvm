@@ -111,10 +111,11 @@ fn create_folders_for_version(version: & str) {
 }
 
 fn install_version(version: & str) {
-    create_folders_for_version(version);
-
+    let current_dir           = os::getcwd();
     let compressed_src_path   = Path(get_rsvm_version_directory(version) + "/src/rust-" + version + ".tar.gz");
     let uncompressed_src_path = Path(get_rsvm_version_directory(version) + "/src/rust-" + version);
+
+    create_folders_for_version(version);
 
     if compressed_src_path.exists() {
         io::println(~"Sources for rust v" + version + ~" already downloaded ...");
@@ -141,8 +142,10 @@ fn install_version(version: & str) {
     io::println("");
     io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
 
+    os::change_dir(&uncompressed_src_path);
+
     let mut output = run::program_output(
-        uncompressed_src_path.to_str() + ~"/configure",
+        ~"./configure",
         [
             ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
             ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
@@ -162,9 +165,7 @@ fn install_version(version: & str) {
     io::println("");
     io::println(~"Building rust v" + version + ~". This will take even more time. See you later ... ");
 
-    output = run::program_output("make", [
-        ~"-C", uncompressed_src_path.to_str()
-    ]);
+    output = run::program_output("make", []);
 
     if output.status != 0 {
         io::println("Hmm, an error occurred while running 'make' ...");
@@ -174,7 +175,7 @@ fn install_version(version: & str) {
         return;
     }
 
-    output = run::program_output("make", [ ~"-C", uncompressed_src_path.to_str(), ~"install" ]);
+    output = run::program_output("make", [ ~"install" ]);
 
     if output.status != 0 {
         io::println("Hmm, an error occurred while running 'make install' ...");
@@ -185,4 +186,6 @@ fn install_version(version: & str) {
     }
 
     io::println("And we are done. Have fun using rust v$1.");
+
+    os::change_dir(&current_dir);
 }
