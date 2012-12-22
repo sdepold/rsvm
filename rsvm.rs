@@ -142,7 +142,7 @@ fn install_version(version: & str) {
     io::println(~"Configuring rust v" + version + ~". This will take some time. Grep a beer in the meantime.");
 
     let mut output = run::program_output(
-        ~"cd " + uncompressed_src_path.to_str() + ~" && ./configure",
+        uncompressed_src_path.to_str() + ~"/configure",
         [
             ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
             ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
