@@ -15,7 +15,7 @@ fn main() {
       }
 
       ~"ls" | ~"list" => {
-
+        list();
       }
 
       ~"u" | ~"use" => {
@@ -23,19 +23,16 @@ fn main() {
       }
 
       _ => {
-        print_help();
+        help();
       }
     }
 }
 
-fn print_teaser() {
-    io::println("");
-    io::println("Rust Version Manager");
-    io::println("====================");
-    io::println("");
-}
+/////////////
+// actions //
+/////////////
 
-fn print_help() {
+fn help() {
     print_teaser();
 
     io::println("Usage:");
@@ -48,28 +45,6 @@ fn print_help() {
     io::println("");
     io::println(~"Current version: " + VERSION);
     io::println("");
-}
-
-pure fn is_number(c: u8) -> bool {
-    c >= 48 && c <= 57
-}
-
-pure fn is_valid_version_format(s: & str) -> bool {
-    if s.len() == 3 {
-        is_number(s[0]) && s[1] == 46 && is_number(s[2])
-    } else if s.len() == 5 {
-        is_number(s[0]) && s[1] == 46 && is_number(s[2]) && s[3] == 46 && is_number(s[4])
-    } else {
-        false
-    }
-}
-
-fn get_rsvm_directory() -> ~str {
-    os::homedir().unwrap().to_str() + "/.rsvm"
-}
-
-fn get_rsvm_version_directory(version: & str) -> ~str {
-     get_rsvm_directory() + "/v" + version
 }
 
 fn install() {
@@ -103,53 +78,78 @@ fn install() {
     io::println("");
 }
 
+fn list() {
+
+  //   directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
+
+  // echo "Installed versions:"
+  // echo ""
+
+  // if [ `grep -o "v" <<< "$directories" | wc -l` = 0 ]
+  // then
+  //   echo '  -  None';
+  // else
+  //   for line in $(echo $directories | tr " " "\n")
+  //   do
+  //     if [ `rsvm_current` = "$line" ]
+  //     then
+  //       echo "  =>  $line"
+  //     else
+  //       echo "  -   $line"
+  //     fi
+  //   done
+  // fi
+}
+
+/////////////
+// helpers //
+/////////////
+
 fn create_folders_for_version(version: & str) {
     io::print(~"Creating the respective folders for rust v" + version + ~" ........ ");
-    run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/src"]);
-    run::run_program("mkdir", [~"-p", get_rsvm_version_directory(version) + "/dist"]);
+    run::run_program("mkdir", [~"-p", get_path_to("version", Some(version)).to_str() + "/src"]);
+    run::run_program("mkdir", [~"-p", get_path_to("version", Some(version)).to_str() + "/dist"]);
     io::println("done");
 }
 
 fn install_version(version: & str) {
-    let current_dir           = os::getcwd();
-    let compressed_src_path   = Path(get_rsvm_version_directory(version) + "/src/rust-" + version + ".tar.gz");
-    let uncompressed_src_path = Path(get_rsvm_version_directory(version) + "/src/rust-" + version);
+    let current_dir = os::getcwd();
 
     create_folders_for_version(version);
 
     io::print(~"Downloading sources for rust v" + version + ~" .................... ");
 
-    if compressed_src_path.exists() {
+    if get_path_to("src_archive", Some(version)).exists() {
         io::println(~"already done");
     } else {
         run::run_program("wget", [
             ~"-q", ~"http://dl.rust-lang.org/dist/rust-" + version + ".tar.gz",
-            ~"-O", compressed_src_path.to_str()
+            ~"-O", get_path_to("src_archive", Some(version)).to_str()
         ]);
         io::println("done");
     }
 
     io::print("Extracting sources ................................... ");
 
-    if uncompressed_src_path.exists() {
+    if get_path_to("src_dir", Some(version)).exists() {
         io::println(~"already done");
     } else {
-        // run::run_program("tar", [
-        //     ~"-C", get_rsvm_version_directory(version) + "/src",
-        //     ~"-xzf", compressed_src_path.to_str()
-        // ]);
+        run::run_program("tar", [
+            ~"-C", get_path_to("version", Some(version)).to_str() + "/src",
+            ~"-xzf", get_path_to("src_archive", Some(version)).to_str()
+        ]);
         io::println("done");
     }
 
     io::print(~"Configuring rust v" + version + ~" (might take a minute or two) ... ");
 
-    os::change_dir(&uncompressed_src_path);
+    os::change_dir(& get_path_to("src_dir", Some(version)));
 
     let mut output = run::program_output(
         ~"./configure",
         [
-            ~"--prefix=" + get_rsvm_version_directory(version) + ~"/dist",
-            ~"--local-rust-root=" + get_rsvm_version_directory(version) + ~"/dist"
+            ~"--prefix=" + get_path_to("dist_dir", Some(version)).to_str(),
+            ~"--local-rust-root=" + get_path_to("dist_dir", Some(version)).to_str()
         ]
     );
 
@@ -163,7 +163,7 @@ fn install_version(version: & str) {
 
     io::println("done");
 
-    io::println(~"Building rust v" + version + ~" (can take up to an hour) .......... ");
+    io::print(~"Building rust v" + version + ~" (can take up to an hour) .......... ");
 
     output = run::program_output("make", []);
 
@@ -188,4 +188,55 @@ fn install_version(version: & str) {
     io::println("done");
 
     os::change_dir(&current_dir);
+}
+
+fn print_teaser() {
+    io::println("");
+    io::println("Rust Version Manager");
+    io::println("====================");
+    io::println("");
+}
+
+pure fn is_number(c: u8) -> bool {
+    c >= 48 && c <= 57
+}
+
+pure fn is_valid_version_format(s: & str) -> bool {
+    if s.len() == 3 {
+        is_number(s[0]) && s[1] == 46 && is_number(s[2])
+    } else if s.len() == 5 {
+        is_number(s[0]) && s[1] == 46 && is_number(s[2]) && s[3] == 46 && is_number(s[4])
+    } else {
+        false
+    }
+}
+
+fn get_path_to(target: & str, opt: Option<&str>) -> Path {
+    let path: ~str = match target {
+      "root" => {
+        os::homedir().unwrap().to_str() + "/.rsvm"
+      }
+
+      "version" => {
+        get_path_to(~"root", None).to_str() + ~"/v" + opt.unwrap()
+      }
+
+      "src_archive" => {
+        get_path_to("version", opt).to_str() + "/src/rust-" + opt.unwrap() + ".tar.gz"
+      }
+
+      "src_dir" => {
+        get_path_to("version", opt).to_str() + "/src/rust-" + opt.unwrap()
+      }
+
+      "dist_dir" => {
+        get_path_to("version", opt).to_str() + "/dist"
+      }
+
+      _ => {
+        os::homedir().unwrap().to_str() + "/.rsvm"
+      }
+    };
+
+    Path(path)
 }
