@@ -79,26 +79,29 @@ fn install() {
 }
 
 fn list() {
+    let dirs = os::list_dir(& get_path_to("root", None));
+    let mut versions: ~[~str] = ~[];
 
-  //   directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v\d+\.\d+\.?\d*"`
+    for dirs.each |&path| {
+        if str::char_at(path, 0) == 'v' {
+            versions.push(path);
+        }
+    }
 
-  // echo "Installed versions:"
-  // echo ""
+    print_teaser();
 
-  // if [ `grep -o "v" <<< "$directories" | wc -l` = 0 ]
-  // then
-  //   echo '  -  None';
-  // else
-  //   for line in $(echo $directories | tr " " "\n")
-  //   do
-  //     if [ `rsvm_current` = "$line" ]
-  //     then
-  //       echo "  =>  $line"
-  //     else
-  //       echo "  -   $line"
-  //     fi
-  //   done
-  // fi
+    io::println("Installed versions:");
+    io::println("");
+
+    if versions.len() == 0 {
+        io::println("  -  None");
+    } else {
+        for versions.each |&path| {
+            io::println(~"  -  " + path.to_str());
+        }
+    }
+
+    io::println("");
 }
 
 /////////////
@@ -188,6 +191,10 @@ fn install_version(version: & str) {
     io::println("done");
 
     os::change_dir(&current_dir);
+}
+
+fn activate_version(version: & str) {
+
 }
 
 fn print_teaser() {
