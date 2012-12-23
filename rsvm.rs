@@ -19,7 +19,7 @@ fn main() {
       }
 
       ~"u" | ~"use" => {
-
+        use_version();
       }
 
       _ => {
@@ -105,6 +105,40 @@ fn list() {
 
             io::println(~"v" + version);
         }
+    }
+
+    io::println("");
+}
+
+fn use_version() {
+    let version: ~str = if os::args().len() == 2 {
+        ~""
+    } else {
+        copy os::args()[2]
+    };
+
+    print_teaser();
+
+    if version == ~"" {
+        io::println("Please define a version of rust!");
+        io::println("");
+        io::println("Example:");
+        io::println("  rsvm use 0.4");
+    } else if is_valid_version_format(version) {
+        io::print(~"Activating rust v" + version + ~" ... ");
+
+        if version_exists(version) {
+            activate_version(version);
+            io::println("done");
+        } else {
+            io::println(~"failed. Version v" + version + ~" is not installed.");
+        }
+    } else {
+        io::println("You defined a version of rust in a wrong format!");
+        io::println("Please use either <major>.<minor> or <major>.<minor>.<patch>.");
+        io::println("");
+        io::println("Example:");
+        io::println("  rsvm use 0.4");
     }
 
     io::println("");
@@ -208,6 +242,10 @@ fn get_active_version() -> ~str {
     let path   = str::trim(output.out);
 
     str::replace(path, get_path_to("root", None).to_str() + ~"/v", "")
+}
+
+fn version_exists(version: &str) -> bool {
+    get_path_to("version", Some(version)).exists()
 }
 
 fn print_teaser() {
