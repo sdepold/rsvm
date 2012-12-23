@@ -123,7 +123,7 @@ fn install_version(version: & str) {
         io::println(~"already done");
     } else {
         run::run_program("wget", [
-            ~"-q", get_path_to("remote_src_path", Some(version)).to_str(),
+            ~"-q",  ~"http://dl.rust-lang.org/dist/rust-" + version + ~".tar.gz",
             ~"-O", get_path_to("rust_src_archive", Some(version)).to_str()
         ]);
         io::println("done");
@@ -236,10 +236,6 @@ fn get_path_to(target: & str, opt: Option<&str>) -> Path {
 
       "dist_dir" => {
         get_path_to("version", opt).to_str() + "/dist"
-      }
-
-      "remote_src_path" => {
-        ~"http://dl.rust-lang.org/dist/rust-" + opt.unwrap() + ~".tar.gz"
       }
 
       _ => {
