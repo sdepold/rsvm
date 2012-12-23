@@ -84,7 +84,7 @@ fn list() {
 
     for dirs.each |&path| {
         if str::char_at(path, 0) == 'v' {
-            versions.push(path);
+            versions.push(str::replace(path, "v", ""));
         }
     }
 
@@ -96,8 +96,14 @@ fn list() {
     if versions.len() == 0 {
         io::println("  -  None");
     } else {
-        for versions.each |&path| {
-            io::println(~"  -  " + path.to_str());
+        for versions.each |&version| {
+            if version == get_active_version() {
+                io::print(~"  => ");
+            } else {
+                io::print(~"  -  ");
+            }
+
+            io::println(~"v" + version);
         }
     }
 
@@ -197,6 +203,13 @@ fn activate_version(version: & str) {
 
 }
 
+fn get_active_version() -> ~str {
+    let output = run::program_output("readlink", [ get_path_to("current", None).to_str() ]);
+    let path   = str::trim(output.out);
+
+    str::replace(path, get_path_to("root", None).to_str() + ~"/v", "")
+}
+
 fn print_teaser() {
     io::println("");
     io::println("Rust Version Manager");
@@ -243,6 +256,10 @@ fn get_path_to(target: & str, opt: Option<&str>) -> Path {
 
       "dist_dir" => {
         get_path_to("version", opt).to_str() + "/dist"
+      }
+
+      "current" => {
+        get_path_to("root", None).to_str() + ~"/current"
       }
 
       _ => {
