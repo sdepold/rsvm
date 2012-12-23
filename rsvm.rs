@@ -107,8 +107,8 @@ fn list() {
 
 fn create_folders_for_version(version: & str) {
     io::print(~"Creating the respective folders for rust v" + version + ~" ........ ");
-    run::run_program("mkdir", [~"-p", get_path_to("version", Some(version)).to_str() + "/src"]);
-    run::run_program("mkdir", [~"-p", get_path_to("version", Some(version)).to_str() + "/dist"]);
+    run::run_program("mkdir", [~"-p", get_path_to("src_dir", Some(version)).to_str()]);
+    run::run_program("mkdir", [~"-p", get_path_to("dist_dir", Some(version)).to_str()]);
     io::println("done");
 }
 
@@ -119,31 +119,31 @@ fn install_version(version: & str) {
 
     io::print(~"Downloading sources for rust v" + version + ~" .................... ");
 
-    if get_path_to("src_archive", Some(version)).exists() {
+    if get_path_to("rust_src_archive", Some(version)).exists() {
         io::println(~"already done");
     } else {
         run::run_program("wget", [
-            ~"-q", ~"http://dl.rust-lang.org/dist/rust-" + version + ".tar.gz",
-            ~"-O", get_path_to("src_archive", Some(version)).to_str()
+            ~"-q", get_path_to("remote_src_path", Some(version)).to_str(),
+            ~"-O", get_path_to("rust_src_archive", Some(version)).to_str()
         ]);
         io::println("done");
     }
 
     io::print("Extracting sources ................................... ");
 
-    if get_path_to("src_dir", Some(version)).exists() {
+    if get_path_to("rust_src_dir", Some(version)).exists() {
         io::println(~"already done");
     } else {
         run::run_program("tar", [
-            ~"-C", get_path_to("version", Some(version)).to_str() + "/src",
-            ~"-xzf", get_path_to("src_archive", Some(version)).to_str()
+            ~"-C", get_path_to("src_dir", Some(version)).to_str(),
+            ~"-xzf", get_path_to("rust_src_archive", Some(version)).to_str()
         ]);
         io::println("done");
     }
 
     io::print(~"Configuring rust v" + version + ~" (might take a minute or two) ... ");
 
-    os::change_dir(& get_path_to("src_dir", Some(version)));
+    os::change_dir(& get_path_to("rust_src_dir", Some(version)));
 
     let mut output = run::program_output(
         ~"./configure",
@@ -221,16 +221,24 @@ fn get_path_to(target: & str, opt: Option<&str>) -> Path {
         get_path_to(~"root", None).to_str() + ~"/v" + opt.unwrap()
       }
 
-      "src_archive" => {
-        get_path_to("version", opt).to_str() + "/src/rust-" + opt.unwrap() + ".tar.gz"
+      "rust_src_archive" => {
+        get_path_to("src_dir", opt).to_str() + "/rust-" + opt.unwrap() + ".tar.gz"
+      }
+
+      "rust_src_dir" => {
+        get_path_to("src_dir", opt).to_str() + "/rust-" + opt.unwrap()
       }
 
       "src_dir" => {
-        get_path_to("version", opt).to_str() + "/src/rust-" + opt.unwrap()
+        get_path_to("version", opt).to_str() + "/src"
       }
 
       "dist_dir" => {
         get_path_to("version", opt).to_str() + "/dist"
+      }
+
+      "remote_src_path" => {
+        ~"http://dl.rust-lang.org/dist/rust-" + opt.unwrap() + ~".tar.gz"
       }
 
       _ => {
