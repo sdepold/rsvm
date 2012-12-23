@@ -19,13 +19,13 @@ if [ ! -z "$1" ]; then
   PROFILE="$1"
 else
   if [ -f "$HOME/.bash_profile" ]; then
-  PROFILE="$HOME/.bash_profile"
+    PROFILE="$HOME/.bash_profile"
   elif [ -f "$HOME/.profile" ]; then
-  PROFILE="$HOME/.profile"
+    PROFILE="$HOME/.profile"
   fi
 fi
 
-SOURCE_STR="[[ -s "$RSVM_TARGET/rsvm.sh" ]] && . "$RSVM_TARGET/rsvm.sh"  # This loads RSVM"
+SOURCE_STR="PATH=\$PATH:$RSVM_TARGET"
 
 if [ -z "$PROFILE" ] || [ ! -f "$PROFILE" ] ; then
   if [ -z $PROFILE ]; then
@@ -42,7 +42,7 @@ if [ -z "$PROFILE" ] || [ ! -f "$PROFILE" ] ; then
   exit
 fi
 
-if ! grep -qc 'rsvm.sh' $PROFILE; then
+if ! grep -qc "$RSVM_TARGET" $PROFILE; then
   echo "=> Appending source string to $PROFILE"
   echo $SOURCE_STR >> "$PROFILE"
 else
