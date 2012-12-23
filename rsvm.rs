@@ -201,6 +201,7 @@ pure fn is_number(c: u8) -> bool {
     c >= 48 && c <= 57
 }
 
+// use std::unicode::is_digit
 pure fn is_valid_version_format(s: & str) -> bool {
     if s.len() == 3 {
         is_number(s[0]) && s[1] == 46 && is_number(s[2])
