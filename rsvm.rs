@@ -239,7 +239,8 @@ fn get_path_to(target: & str, opt: Option<&str>) -> Path {
       }
 
       _ => {
-        os::homedir().unwrap().to_str() + "/.rsvm"
+        io::println(~"Unknown option '" + target + "' ...");
+        get_path_to("root", None).to_str()
       }
     };
 
