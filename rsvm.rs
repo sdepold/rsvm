@@ -131,7 +131,12 @@ fn use_version() {
             activate_version(version);
             io::println("done");
         } else {
-            io::println(~"failed. Version v" + version + ~" is not installed.");
+            io::println("failed");
+            io::println("");
+            io::println(~"The specified version v" + version + ~" of rust is not installed...");
+            io::println("You might want to install it with the following command:");
+            io::println("");
+            io::println(~"rsvm install " + version);
         }
     } else {
         io::println("You defined a version of rust in a wrong format!");
@@ -234,7 +239,12 @@ fn install_version(version: & str) {
 }
 
 fn activate_version(version: & str) {
-
+    run::program_output("rm", [ ~"-rf", get_path_to("current", None).to_str() ]);
+    run::program_output("ln", [
+        ~"-s",
+        get_path_to("version", Some(version)).to_str(),
+        get_path_to("current", None).to_str()
+    ]);
 }
 
 fn get_active_version() -> ~str {
