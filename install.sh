@@ -25,7 +25,7 @@ else
   fi
 fi
 
-SOURCE_STR="PATH=\$PATH:$RSVM_TARGET"
+SOURCE_STR="PATH=\$PATH:$RSVM_TARGET/dist:$RSVM_TARGET/current/bin"
 
 if [ -z "$PROFILE" ] || [ ! -f "$PROFILE" ] ; then
   if [ -z $PROFILE ]; then
