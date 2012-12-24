@@ -155,9 +155,16 @@ fn use_version() {
 }
 
 fn clear() {
+    print_teaser();
+
+    io::print(~"Clearing link to current v" + get_active_version() + ~" ... ");
+
     run::program_output(~"rm", [
         ~"-rf", get_path_to("current", None).to_str()
     ]);
+
+    io::println("done");
+    io::println("");
 }
 
 /////////////
