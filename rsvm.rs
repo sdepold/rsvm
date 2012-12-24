@@ -22,6 +22,10 @@ fn main() {
         use_version();
       }
 
+      ~"clear" => {
+        clear();
+      }
+
       _ => {
         help();
       }
@@ -41,6 +45,7 @@ fn help() {
     io::println("  rsvm install <version>        Download and install a <version>. <version> could be for example '0.4'.");
     // echo '  rsvm uninstall <version>      Uninstall a <version>.'
     io::println("  rsvm use <version>            Activate <version> for now and the future.");
+    io::println("  rsvm clear                    Clear the link to the current version.");
     io::println("  rsvm ls | list                List all installed versions of rust.");
     io::println("");
     io::println(~"Current version: " + VERSION);
@@ -147,6 +152,12 @@ fn use_version() {
     }
 
     io::println("");
+}
+
+fn clear() {
+    run::program_output(~"rm", [
+        ~"-rf", get_path_to("current", None).to_str()
+    ]);
 }
 
 /////////////
