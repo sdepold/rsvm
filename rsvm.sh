@@ -86,7 +86,7 @@ rsvm_install()
     echo "Sources for rust v$1 already downloaded ..."
   else
     echo -n "Downloading sources for rust v$1 ... "
-    wget -q "http://dl.rust-lang.org/dist/rust-$1.tar.gz"
+    wget -q "http://static.rust-lang.org/dist/rust-$1.tar.gz"
     echo "done"
   fi
 
