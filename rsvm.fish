@@ -10,7 +10,12 @@ if not test -d "$RSVM_DIR"
 end
 
 if [ -e "$RSVM_DIR/current/dist/bin" ]
-  set -x PATH $RSVM_DIR/current/dist/bin $PATH
+  if not contains $RSVM_DIR/current/dist/bin $PATH
+      set -x PATH $RSVM_DIR/current/dist/bin $PATH
+  end
+  if not contains $RSVM_DIR/current/dist/lib $LD_LIBRARY_PATH
+      set -x LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib $LD_LIBRARY_PATH
+  end
 end
 
 function rsvm_use
