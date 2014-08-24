@@ -77,11 +77,10 @@ function rsvm_install_nightly
 
   rsvm_init_folder_structure $v
 
-  set -x CFG_PREFIX $RSVM_DIR/$v/dist
   curl https://static.rust-lang.org/rustup.sh | bash -s -- --prefix="$RSVM_DIR/$v/dist"
 
   echo ""
-  echo "And we are done. Have fun using rust v$v."
+  echo "And we are done. Have fun using rust $v."
 end
 
 function rsvm_install
@@ -98,11 +97,11 @@ function rsvm_install
       set platform $arch-unknown-linux-gnu
   end
 
-  if test -f "rust-$v.tar.gz"
+  if test -f "rust-$v-$platform.tar.gz"
     echo "Sources for rust v$v already downloaded ..."
   else
     echo -n "Downloading sources for rust v$v ... "
-    curl -o "rust-$v-$platform.tar.gz" "https://static.rust-lang.org/dist/rust-$v-$platform.tar.gz"
+    curl -s -o "rust-$v-$platform.tar.gz" "https://static.rust-lang.org/dist/rust-$v-$platform.tar.gz"
     echo "done"
   end
 
@@ -111,12 +110,12 @@ function rsvm_install
   else
     echo -n "Extracting source ... "
     tar -xzf "rust-$v-$platform.tar.gz"
+    mv "rust-$v-$platform" "rust-$v"
     echo "done"
   end
 
-  mv "rust-$v-$platform" "rust-$v"
   cd "rust-$v"
-
+  ls
   sh install.sh --prefix=$RSVM_DIR/v$v/dist
 
   echo ""
@@ -155,8 +154,10 @@ function rsvm
         echo "  rsvm install 0.11.0"
       else if [ "$v" = "nightly" ]
         rsvm_install_nightly
-      else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+      else if test -z (echo "$v" | sed -r 's/0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_install "$v"
+      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
+        rsvm_install (echo "$v" | sed -r 's/^v//g')
       else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
@@ -175,9 +176,9 @@ function rsvm
         echo ""
         echo "Example:"
         echo "  rsvm use 0.11.0"
-      else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+      else if test -z (echo "$v" | sed -r 's/0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_use "v$v"
-      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_use "$v"
       else if test -z (echo "$v" | sed -r 's/nightly\.[0-9]+//g')
         rsvm_use "$v"
