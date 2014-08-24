@@ -20,16 +20,16 @@ end
 
 function rsvm_use
   set -l v "$argv[1]"
-  if test -e "$RSVM_DIR/v$v"
-    echo -n "Activating rust v$v ... "
+  if test -e "$RSVM_DIR/$v"
+    echo -n "Activating rust $v ... "
 
     rm -rf $RSVM_DIR/current
-    ln -s $RSVM_DIR/v$v $RSVM_DIR/current
+    ln -s $RSVM_DIR/$v $RSVM_DIR/current
     source $RSVM_DIR/rsvm.fish
 
     echo "done"
   else
-    echo "The specified version v$v of rust is not installed..."
+    echo "The specified version $v of rust is not installed..."
     echo "You might want to install it with the following command:"
     echo ""
     echo "rsvm install $v"
@@ -41,7 +41,7 @@ function rsvm_current
 end
 
 function rsvm_ls
-  set -l directories (find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^v[0-9]+\.[0-9]+\.?[0-9]*")
+  set -l directories (find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^(nightly\.[0-9]+|v[0-9]+\.[0-9]+\.?[0-9]*)"|sort)
 
   echo "Installed versions:"
   echo ""
@@ -62,19 +62,33 @@ end
 
 function rsvm_init_folder_structure
   set -l v $argv[1]
-  echo -n "Creating the respective folders for rust v$v ... "
+  echo -n "Creating the respective folders for rust $v ... "
 
-  mkdir -p "$RSVM_DIR/v$v/src"
-  mkdir -p "$RSVM_DIR/v$v/dist"
+  mkdir -p "$RSVM_DIR/$v/src"
+  mkdir -p "$RSVM_DIR/$v/dist"
 
   echo "done"
+end
+
+function rsvm_install_nightly
+  set -l current_dir (pwd)
+  set -l current (date "+%Y%m%d%H%M%S")
+  set -l v nightly.$current
+
+  rsvm_init_folder_structure $v
+
+  set -x CFG_PREFIX $RSVM_DIR/$v/dist
+  curl https://static.rust-lang.org/rustup.sh | bash -s -- --prefix="$RSVM_DIR/$v/dist"
+
+  echo ""
+  echo "And we are done. Have fun using rust v$v."
 end
 
 function rsvm_install
   set -l current_dir (pwd)
   set -l v $argv[1]
 
-  rsvm_init_folder_structure $v
+  rsvm_init_folder_structure v$v
   cd "$RSVM_DIR/v$v/src"
 
   set -l arch (uname -m)
@@ -139,6 +153,8 @@ function rsvm
         echo ""
         echo "Example:"
         echo "  rsvm install 0.11.0"
+      else if [ "$v" = "nightly" ]
+        rsvm_install_nightly
       else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
         rsvm_install "$v"
       else
@@ -160,6 +176,10 @@ function rsvm
         echo "Example:"
         echo "  rsvm use 0.11.0"
       else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+        rsvm_use "v$v"
+      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+        rsvm_use "$v"
+      else if test -z (echo "$v" | sed -r 's/nightly\.[0-9]+//g')
         rsvm_use "$v"
       else
         # the version was defined in a the wrong format.
