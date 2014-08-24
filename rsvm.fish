@@ -139,19 +139,15 @@ function rsvm
         echo ""
         echo "Example:"
         echo "  rsvm install 0.11.0"
-      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+      else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+        rsvm_install "$v"
+      else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
         echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
         echo ""
         echo "Example:"
         echo "  rsvm install 0.11.0"
-      else
-        #if [ "$opt" = "--dry" ]
-        #  echo "Would install rust v$v"
-        #else
-        rsvm_install "$v"
-        #end
       end
     case "ls" "list"
       rsvm_ls
@@ -163,17 +159,16 @@ function rsvm
         echo ""
         echo "Example:"
         echo "  rsvm use 0.11.0"
-      else if test -z (echo "$v" | sed -r 's/v0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+      else if test -z (echo "$v" | sed -r 's/0\.(8\.[012345]|[1234567]\.[0-9]+)//g')
+        rsvm_use "$v"
+      else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
         echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
         echo ""
         echo "Example:"
         echo "  rsvm use 0.11.0"
-      else
-        rsvm_use "$v"
       end
   end
-
   echo ''
 end
