@@ -124,19 +124,33 @@ function rsvm_install
   cd $current_dir
 end
 
-function rsvm
-  echo ''
-  echo 'Rust Version Manager'
-  echo '===================='
-  echo ''
+function rsvm_uninstall
+  set -l current_dir (pwd)
+  set -l v $argv[1]
+  if [ $v = (rsvm_current) ]
+    echo "rsvm: Cannot uninstall currently-active version, $v."
+    return
+  end
+  if not test -d "$RSVM_DIR/$v"
+    echo "$v version is not installed yet... "
+    return
+  end
+  echo "uninstall $v ..."
+  rm -rI "$RSVM_DIR/$v"
+end
 
+function rsvm
   switch "$argv[1]"
     case "help" "--help" "-h" ""
+      echo ''
+      echo 'Rust Version Manager'
+      echo '===================='
+      echo ''
       echo 'Usage:'
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
       echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.11.0".'
-      # echo '  rsvm uninstall <version>      Uninstall a <version>.'
+      echo '  rsvm uninstall <version>      Uninstall a <version>.'
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
       echo ''
@@ -161,6 +175,10 @@ function rsvm
         echo "Example:"
         echo "  rsvm install 0.11.0"
       end
+    case "uninstall"
+      [ (count $argv) -ne 2 ]; and rsvm help; and return
+      set -l v $argv[2]
+      rsvm_uninstall "$v"
     case "ls" "list"
       rsvm_ls
     case use
