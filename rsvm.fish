@@ -157,7 +157,7 @@ function rsvm
       echo "Current version: $RSVM_VERSION"
     case "version" "--version" "-v"
       echo "v$RSVM_VERSION"
-    case "install"
+    case "install" "ins"
       [ (count $argv) -ne 2 ]; and rsvm help; and return
       set -l v $argv[2]
       #set -l opt $argv[3]
@@ -175,7 +175,7 @@ function rsvm
         echo "Example:"
         echo "  rsvm install 0.11.0"
       end
-    case "uninstall"
+    case "uninstall" "rm"
       [ (count $argv) -ne 2 ]; and rsvm help; and return
       set -l v $argv[2]
       rsvm_uninstall "$v"
