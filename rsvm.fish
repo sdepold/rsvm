@@ -115,8 +115,22 @@ function rsvm_install
   end
 
   cd "rust-$v"
-  ls
   sh install.sh --prefix=$RSVM_DIR/v$v/dist
+
+  if not test -f $RSVM_DIR/v$v/dist/bin/cargo
+    cd "$RSVM_DIR/v$v/src"
+    echo -n "Downloading sources for cargo nightly ... "
+    curl -s -o "cargo-nightly-$platform.tar.gz" "https://static.rust-lang.org/cargo-dist/cargo-nightly-$platform.tar.gz"
+    echo "done"
+
+    echo -n "Extracting source ... "
+    tar -xzf "cargo-nightly-$platform.tar.gz"
+    mv "cargo-nightly-x86_64-unknown-linux-gnu" "cargo-nightly"
+    echo "done"
+
+    cd "cargo-nightly"
+    sh install.sh --prefix=$RSVM_DIR/v$v/dist
+  end
 
   echo ""
   echo "And we are done. Have fun using rust v$v."
