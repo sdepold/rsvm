@@ -130,7 +130,7 @@ function rsvm
   echo '===================='
   echo ''
 
-  switch $argv[1]
+  switch "$argv[1]"
     case "help" "--help" "-h" ""
       echo 'Usage:'
       echo ''
@@ -144,15 +144,10 @@ function rsvm
     case "version" "--version" "-v"
       echo "v$RSVM_VERSION"
     case "install"
+      [ (count $argv) -ne 2 ]; and rsvm help; and return
       set -l v $argv[2]
       #set -l opt $argv[3]
-      if test -z "$v"
-        # whoops. no version found!
-        echo "Please define a version of rust!"
-        echo ""
-        echo "Example:"
-        echo "  rsvm install 0.11.0"
-      else if [ "$v" = "nightly" ]
+      if [ "$v" = "nightly" ]
         rsvm_install_nightly
       else if test -z (echo "$v" | sed -r 's/0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_install "$v"
@@ -169,14 +164,9 @@ function rsvm
     case "ls" "list"
       rsvm_ls
     case use
+      [ (count $argv) -ne 2 ]; and rsvm help; and return
       set -l v $argv[2]
-      if test -z "$v"
-        # whoops. no version found!
-        echo "Please define a version of rust!"
-        echo ""
-        echo "Example:"
-        echo "  rsvm use 0.11.0"
-      else if test -z (echo "$v" | sed -r 's/0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
+      if test -z (echo "$v" | sed -r 's/0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_use "v$v"
       else if test -z (echo "$v" | sed -r 's/v0\.(8\.[0-9]+|[0-9]+\.[0-9]+)//g')
         rsvm_use "$v"
