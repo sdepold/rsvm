@@ -37,7 +37,7 @@ function rsvm_use
 end
 
 function rsvm_current
-  echo (readlink .rsvm/current|tr "/" "\n" | tail -n 1)
+  echo (readlink $RSVM_DIR/current|tr "/" "\n" | tail -n 1)
 end
 
 function rsvm_ls
