@@ -64,6 +64,8 @@ function rsvm_mod_env
 
     if test $p[1] = PATH
       rsvm_set_path PATH $p[2..-1]
+    else if test $p[1] = LD_LIBRARY_PATH
+      rsvm_set_path LD_LIBRARY_PATH $p[2..-1]
     else if test $p[1] = MANPATH
       rsvm_set_path MANPATH $p[2..-1]
     end
