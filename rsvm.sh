@@ -130,6 +130,25 @@ rsvm_install()
   cd $current_dir
 }
 
+rsvm_ls_remote()
+{
+  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  ARCH=`uname -m`
+  OSTYPE=`uname`
+  local VERSIONS
+  if [ "$OSTYPE" = "Linux" ]
+  then
+    PLATFORM=$ARCH-unknown-linux-gnu
+    # TODO OTHER PLATFORM
+  fi
+  VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.html -o - \
+    | command egrep -o "rust-$VERSION_PATTERN-$PLATFORM.tar.gz" \
+    | command uniq \
+    | command egrep -o "$VERSION_PATTERN" \
+    | command sort)
+  echo $VERSIONS
+}
+
 rsvm()
 {
   echo ''
@@ -146,6 +165,7 @@ rsvm()
       # echo '  rsvm uninstall <version>      Uninstall a <version>.'
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
+      echo '  rsvm ls-remote                List remote versions available for install.'
       echo ''
       echo "Current version: $RSVM_VERSION"
       ;;
@@ -175,11 +195,14 @@ rsvm()
         echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
         echo ""
         echo "Example:"
-        echo "  rsvm install 0.4"
+        echo "  rsvm install 0.12"
       fi
       ;;
     ls|list)
       rsvm_ls
+      ;;
+    ls-remote)
+      rsvm_ls_remote
       ;;
     use)
       if [ -z "$2" ]
