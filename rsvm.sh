@@ -112,12 +112,19 @@ rsvm_install()
   cd $SRC
 
   local ARCH=`uname -m`
-  local OSTYPE=`uname`
-  local PLATFORM
-  if [ "$OSTYPE" = "Linux" ]
-  then
-    PLATFORM=$ARCH-unknown-linux-gnu
-  fi
+  local OSTYPE=`uname -s`
+  case $OSTYPE in
+    Linux)
+      PLATFORM=$ARCH-unknown-linux-gnu
+      ;;
+    Darwin)
+      PLATFORM=$ARCH-apple-darwin
+      ;;
+    *)
+      echo "rsvm: Not support this platform, $OSTYPE"
+      return
+      ;;
+  esac
 
   if [ -f "rust-$1-$PLATFORM.tar.gz" ]
   then
@@ -166,14 +173,22 @@ rsvm_ls_remote()
 {
   local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
   local ARCH=`uname -m`
-  local OSTYPE=`uname`
+  local OSTYPE=`uname -s`
   local VERSIONS
   local PLATFORM
-  if [ "$OSTYPE" = "Linux" ]
-  then
-    PLATFORM=$ARCH-unknown-linux-gnu
-    # TODO OTHER PLATFORM
-  fi
+  case $OSTYPE in
+    Linux)
+      PLATFORM=$ARCH-unknown-linux-gnu
+      ;;
+    Darwin)
+      PLATFORM=$ARCH-apple-darwin
+      ;;
+    *)
+      echo "rsvm: Not support this platform, $OSTYPE"
+      return
+      ;;
+  esac
+
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.html -o - \
     | command egrep -o "rust-$VERSION_PATTERN-$PLATFORM.tar.gz" \
     | command uniq \
