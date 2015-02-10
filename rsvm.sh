@@ -106,7 +106,10 @@ rsvm_install()
     version=$1
   fi
   rsvm_init_folder_structure $version
-  cd "$RSVM_DIR/$version/src"
+  local SRC="$RSVM_DIR/$version/src"
+  local DIST="$RSVM_DIR/$version/dist"
+
+  cd $SRC
 
   local ARCH=`uname -m`
   local OSTYPE=`uname`
@@ -135,13 +138,8 @@ rsvm_install()
     echo "done"
   fi
 
-  cd "rust-$1"
-
-  sh install.sh --prefix=$RSVM_DIR/$version/dist
-
-  if [ ! -f $RSVM_DIR/$version/dist/bin/cargo ]
+  if [ ! -f $SRC/rust-$1/bin/cargo ]
   then
-    cd "$RSVM_DIR/$version/src"
     echo -n "Downloading sources for cargo nightly ... "
     curl -o "cargo-nightly-$PLATFORM.tar.gz" "https://static.rust-lang.org/cargo-dist/cargo-nightly-$PLATFORM.tar.gz"
     echo "done"
@@ -151,9 +149,13 @@ rsvm_install()
     mv "cargo-nightly-$PLATFORM" "cargo-nightly"
     echo "done"
 
-    cd "cargo-nightly"
-    sh install.sh --prefix=$RSVM_DIR/$version/dist
+    cd "$SRC/cargo-nightly"
+    sh install.sh --prefix=$DIST
   fi
+
+  cd "$SRC/rust-$1"
+  sh install.sh --prefix=$DIST
+
   echo ""
   echo "And we are done. Have fun using rust $version."
 
