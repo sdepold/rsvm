@@ -43,16 +43,19 @@ rsvm_current()
 
 rsvm_ls()
 {
-  directories=`find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \;|egrep "^(nightly\.[0-9]+|v[0-9]+\.[0-9]+\.?[0-9]*)"|sort`
+  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  local DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+    | egrep ^$VERSION_PATTERN \
+    | sort)
 
   echo "Installed versions:"
   echo ""
 
-  if [ `grep -o "v" <<< "$directories" | wc -l` = 0 ]
+  if [ $(echo $DIRECTORIES | wc -l) = 0 ]
   then
     echo '  -  None';
   else
-    for line in $(echo $directories | tr " " "\n")
+    for line in $(echo $DIRECTORIES | tr " " "\n")
     do
       if [ `rsvm_current` = "$line" ]
       then
