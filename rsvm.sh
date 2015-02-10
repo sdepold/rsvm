@@ -61,13 +61,13 @@ rsvm_ls()
 {
   local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
   local DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
-    | egrep ^$VERSION_PATTERN \
-    | sort)
+    | sort \
+    | egrep "^$VERSION_PATTERN")
 
   echo "Installed versions:"
   echo ""
 
-  if [ $(echo $DIRECTORIES | wc -l) = 0 ]
+  if [ $(egrep -o "^$VERSION_PATTERN" <<< "$DIRECTORIES" | wc -l) = 0 ]
   then
     echo '  -  None';
   else
@@ -218,7 +218,7 @@ rsvm_uninstall()
 
 rsvm()
 {
-  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  local VERSION_PATTERN="(nightly(.[0-9]+)?|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
 
   echo ''
   echo 'Rust Version Manager'
@@ -252,7 +252,12 @@ rsvm()
         echo "  rsvm install 0.12.0"
       elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
       then
-        rsvm_install "$2"
+        if [ "$3" = "--dry" ]
+        then
+          echo "Would install rust $2"
+        else
+          rsvm_install "$2"
+        fi
       else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
@@ -276,7 +281,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm use 0.12.0"
-      elif ([[ "$2" =~ ^$VERSION_PATTERN ]])
+      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
       then
         rsvm_use "$2"
       else
@@ -296,7 +301,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm use 0.12.0"
-      elif ([[ "$2" =~ ^$VERSION_PATTERN ]])
+      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
       then
         rsvm_uninstall "$2"
       else
