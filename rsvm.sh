@@ -74,60 +74,55 @@ rsvm_init_folder_structure()
   echo "done"
 }
 
-rsvm_install_nightly() {
-  current_dir=`pwd`
-  current=`date "+%Y%m%d%H%M%S"`
-  v=nightly.$current
-
-  rsvm_init_folder_structure $v
-
-  curl https://static.rust-lang.org/rustup.sh | bash -s -- --prefix="$RSVM_DIR/$v/dist"
-
-  echo ""
-  echo "And we are done. Have fun using rust $v."
-}
-
 rsvm_install()
 {
-  current_dir=`pwd`
+  local CURRENT_DIR=`pwd`
+  local version
 
-  rsvm_init_folder_structure v$1
-  cd "$RSVM_DIR/v$1/src"
 
-  arch=`uname -m`
-  ostype=`uname`
-  if [ "$ostype" = "Linux" ]
+  if [[ $1 = "nightly" ]]
   then
-    platform=$arch-unknown-linux-gnu
+    version=nightly.`date "+%Y%m%d%H%M%S"`
+  else
+    version=$1
+  fi
+  rsvm_init_folder_structure $version
+  cd "$RSVM_DIR/$version/src"
+
+  local ARCH=`uname -m`
+  local OSTYPE=`uname`
+  if [ "$OSTYPE" = "Linux" ]
+  then
+    PLATFORM=$ARCH-unknown-linux-gnu
   fi
 
-  if [ -f "rust-$1-$platform.tar.gz" ]
+  if [ -f "rust-$1-$PLATFORM.tar.gz" ]
   then
-    echo "Sources for rust v$1 already downloaded ..."
+    echo "Sources for rust $version already downloaded ..."
   else
-    echo -n "Downloading sources for rust v$1 ... "
-    curl -s -o "rust-$1-$platform.tar.gz" "https://static.rust-lang.org/dist/rust-$1-$platform.tar.gz"
+    echo -n "Downloading sources for rust $version ... "
+    curl -o "rust-$1-$PLATFORM.tar.gz" "https://static.rust-lang.org/dist/rust-$1-$PLATFORM.tar.gz"
     echo "done"
   fi
 
   if [ -e "rust-$1" ]
   then
-    echo "Sources for rust v$1 already extracted ..."
+    echo "Sources for rust $version already extracted ..."
   else
     echo -n "Extracting source ... "
-    tar -xzf "rust-$1-$platform.tar.gz"
-    mv "rust-$1-$platform" "rust-$1"
+    tar -xzf "rust-$1-$PLATFORM.tar.gz"
+    mv "rust-$1-$PLATFORM" "rust-$1"
     echo "done"
   fi
 
   cd "rust-$1"
 
-  sh install.sh --prefix=$RSVM_DIR/v$1/dist
+  sh install.sh --prefix=$RSVM_DIR/$version/dist
 
   echo ""
-  echo "And we are done. Have fun using rust v$1."
+  echo "And we are done. Have fun using rust $version."
 
-  cd $current_dir
+  cd $CURRENT_DIR
 }
 
 rsvm_ls_remote()
@@ -151,6 +146,8 @@ rsvm_ls_remote()
 
 rsvm()
 {
+  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+
   echo ''
   echo 'Rust Version Manager'
   echo '===================='
@@ -161,7 +158,7 @@ rsvm()
       echo 'Usage:'
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
-      echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.4".'
+      echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.12.0".'
       # echo '  rsvm uninstall <version>      Uninstall a <version>.'
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
@@ -179,23 +176,17 @@ rsvm()
         echo "Please define a version of rust!"
         echo ""
         echo "Example:"
-        echo "  rsvm install 0.4"
-      elif [ "$2" = "nightly" ]
-      then
-        rsvm_install_nightly
-      elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
+        echo "  rsvm install 0.12.0"
+      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
       then
         rsvm_install "$2"
-      elif ([[ "$2" =~ ^v[0-9]+\.[0-9]+\.?[0-9]*$ ]])
-      then
-        rsvm_install `echo "$2" | sed -r 's/^v//g'`
       else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
         echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
         echo ""
         echo "Example:"
-        echo "  rsvm install 0.12"
+        echo "  rsvm install 0.12.0"
       fi
       ;;
     ls|list)
@@ -211,7 +202,7 @@ rsvm()
         echo "Please define a version of rust!"
         echo ""
         echo "Example:"
-        echo "  rsvm use 0.4"
+        echo "  rsvm use 0.12.0"
       elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
       then
         rsvm_use "v$2"
@@ -224,10 +215,11 @@ rsvm()
         echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
         echo ""
         echo "Example:"
-        echo "  rsvm use 0.4"
+        echo "  rsvm use 0.12.0"
       fi
       ;;
   esac
 
   echo ''
 }
+# vim: et ts=2 sw=2
