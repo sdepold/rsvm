@@ -25,6 +25,7 @@ rsvm_append_path()
 
 export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
+export MANPATH=$(rsvm_append_path $MANPATH $RSVM_DIR/current/dist/share/man)
 
 rsvm_use()
 {
@@ -138,6 +139,21 @@ rsvm_install()
 
   sh install.sh --prefix=$RSVM_DIR/$version/dist
 
+  if [ ! -f $RSVM_DIR/$version/dist/bin/cargo ]
+  then
+    cd "$RSVM_DIR/$version/src"
+    echo -n "Downloading sources for cargo nightly ... "
+    curl -o "cargo-nightly-$PLATFORM.tar.gz" "https://static.rust-lang.org/cargo-dist/cargo-nightly-$PLATFORM.tar.gz"
+    echo "done"
+
+    echo -n "Extracting source ... "
+    tar -xzf "cargo-nightly-$PLATFORM.tar.gz"
+    mv "cargo-nightly-$PLATFORM" "cargo-nightly"
+    echo "done"
+
+    cd "cargo-nightly"
+    sh install.sh --prefix=$RSVM_DIR/$version/dist
+  fi
   echo ""
   echo "And we are done. Have fun using rust $version."
 
