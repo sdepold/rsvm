@@ -11,10 +11,20 @@ then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
 
-if [ -e "$RSVM_DIR/current/dist/bin" ]
-then
-  PATH=$RSVM_DIR/current/dist/bin:$PATH
-fi
+rsvm_append_path()
+{
+  local newpath
+  if [[ ":$1:" != *":$2:"* ]];
+  then
+    newpath="${1:+"$1:"}$2"
+  else
+    newpath="$1"
+  fi
+  echo $newpath
+}
+
+export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
+export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 
 rsvm_use()
 {
@@ -208,10 +218,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm use 0.12.0"
-      elif ([[ "$2" =~ ^[0-9]+\.[0-9]+\.?[0-9]*$ ]])
-      then
-        rsvm_use "v$2"
-      elif ([[ "$2" =~ ^(nightly\.[0-9]+|v[0-9]+\.[0-9]+\.?[0-9]*)$ ]])
+      elif ([[ "$2" =~ ^$VERSION_PATTERN ]])
       then
         rsvm_use "$2"
       else
