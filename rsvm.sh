@@ -94,6 +94,7 @@ rsvm_install()
 
   local ARCH=`uname -m`
   local OSTYPE=`uname`
+  local PLATFORM
   if [ "$OSTYPE" = "Linux" ]
   then
     PLATFORM=$ARCH-unknown-linux-gnu
@@ -131,9 +132,10 @@ rsvm_install()
 rsvm_ls_remote()
 {
   local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
-  ARCH=`uname -m`
-  OSTYPE=`uname`
+  local ARCH=`uname -m`
+  local OSTYPE=`uname`
   local VERSIONS
+  local PLATFORM
   if [ "$OSTYPE" = "Linux" ]
   then
     PLATFORM=$ARCH-unknown-linux-gnu
