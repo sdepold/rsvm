@@ -161,7 +161,26 @@ rsvm_ls_remote()
     | command uniq \
     | command egrep -o "$VERSION_PATTERN" \
     | command sort)
-  echo $VERSIONS
+  for VERSION in $VERSIONS;
+  do
+    echo $VERSION
+  done
+}
+
+rsvm_uninstall()
+{
+  if [ `rsvm_current` = "$1" ]
+  then
+    echo "rsvm: Cannot uninstall currently-active version, $1"
+    return
+  fi
+  if [ ! -d "$RSVM_DIR/$1" ]
+  then
+    echo "$! version is not installed yet... "
+    return
+  fi
+  echo "uninstall $1 ..."
+  rm -rI "$RSVM_DIR/$1"
 }
 
 rsvm()
@@ -178,8 +197,9 @@ rsvm()
       echo 'Usage:'
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
-      echo '  rsvm install <version>        Download and install a <version>. <version> could be for example "0.12.0".'
-      # echo '  rsvm uninstall <version>      Uninstall a <version>.'
+      echo '  rsvm install <version>        Download and install a <version>.'
+      echo '                                <version> could be for example "0.12.0".'
+      echo '  rsvm uninstall <version>      Uninstall a <version>.'
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
       echo '  rsvm ls-remote                List remote versions available for install.'
@@ -235,6 +255,25 @@ rsvm()
         echo "  rsvm use 0.12.0"
       fi
       ;;
+    uninstall)
+      if [ -z "$2" ]
+      then
+        # whoops. no version found!
+        echo "Please define a version of rust!"
+        echo ""
+        echo "Example:"
+        echo "  rsvm use 0.12.0"
+      elif ([[ "$2" =~ ^$VERSION_PATTERN ]])
+      then
+        rsvm_uninstall "$2"
+      else
+        # the version was defined in a the wrong format.
+        echo "You defined a version of rust in a wrong format!"
+        echo "Please use either <major>.<minor> or <major>.<minor>.<patch>."
+        echo ""
+        echo "Example:"
+        echo "  rsvm uninstall 0.12.0"
+      fi
   esac
 
   echo ''
