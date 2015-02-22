@@ -8,7 +8,7 @@ export RSVM_DIR=`pwd`
 
 function cleanup()
 {
-  rm -rf `pwd`/v*
+  rm -rf `pwd`/0.*
   rm -rf `pwd`/current
 }
 
@@ -79,14 +79,14 @@ function assert()
 @test "'rsvm install 0.4' is not complaining" {
   cleanup
   run rsvm install 0.4 --dry
-  assert ${lines[2]} "Would install rust v0.4"
+  assert ${lines[2]} "Would install rust 0.4"
   cleanup
 }
 
 @test "'rsvm install 0.4.1' is not complaining" {
   cleanup
   run rsvm install 0.4.1 --dry
-  assert ${lines[2]} "Would install rust v0.4.1"
+  assert ${lines[2]} "Would install rust 0.4.1"
   cleanup
 }
 
@@ -113,8 +113,8 @@ function assert()
 
   run rsvm ls
   assert ${lines[2]} "Installed versions:"
-  assert ${lines[3]} "  -   v0.1"
-  assert ${lines[4]} "  -   v0.5"
+  assert ${lines[3]} "  -   0.1"
+  assert ${lines[4]} "  -   0.5"
 
   cleanup
 }
@@ -145,6 +145,6 @@ function assert()
   cleanup
   run rsvm_init_folder_structure 0.1
   run rsvm use 0.1
-  assert ${lines[2]} "Activating rust v0.1 ... done"
+  assert ${lines[2]} "Activating rust 0.1 ... done"
   cleanup
 }
