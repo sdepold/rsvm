@@ -57,6 +57,12 @@ rsvm ls
 rsvm list
 ```
 
+List all versions of rust that are available for installation.
+
+```console
+rsvm ls-remote
+```
+
 ## Example: Install 0.12.0
 
 ```console
