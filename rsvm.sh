@@ -25,6 +25,7 @@ rsvm_append_path()
 
 export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
+export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 export MANPATH=$(rsvm_append_path $MANPATH $RSVM_DIR/current/dist/share/man)
 
 rsvm_use()
