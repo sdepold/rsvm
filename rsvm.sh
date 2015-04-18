@@ -60,7 +60,7 @@ rsvm_current()
 
 rsvm_ls()
 {
-  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
   local DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
     | sort \
     | egrep "^$VERSION_PATTERN")
@@ -172,7 +172,7 @@ rsvm_install()
 
 rsvm_ls_remote()
 {
-  local VERSION_PATTERN="(nightly|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
   local ARCH=`uname -m`
   local OSTYPE=`uname -s`
   local VERSIONS
@@ -219,7 +219,7 @@ rsvm_uninstall()
 
 rsvm()
 {
-  local VERSION_PATTERN="(nightly(.[0-9]+)?|[0-9]\.[0-9]+(\.[0-9]+)?(-alpha)?)"
+  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
 
   echo ''
   echo 'Rust Version Manager'
