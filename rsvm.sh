@@ -4,7 +4,7 @@
 # To use the rsvm command source this file from your bash profile.
 
 RSVM_VERSION="0.1.0"
-RSVM_VERSION_PATTERN="((nightly\.[0-9]*|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
+RSVM_VERSION_PATTERN="((nightly(\.[0-9]+)?|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
 
 # Auto detect the NVM_DIR
 if [ ! -d "$RSVM_DIR" ]
@@ -209,7 +209,7 @@ rsvm_uninstall()
   fi
   if [ ! -d "$RSVM_DIR/$1" ]
   then
-    echo "$! version is not installed yet... "
+    echo "$1 version is not installed yet..."
     return
   fi
   echo "uninstall $1 ..."
@@ -219,13 +219,12 @@ rsvm_uninstall()
 rsvm()
 {
 
-  echo ''
-  echo 'Rust Version Manager'
-  echo '===================='
-  echo ''
-
   case $1 in
     ""|help|--help|-h)
+      echo ''
+      echo 'Rust Version Manager'
+      echo '===================='
+      echo ''
       echo 'Usage:'
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
@@ -311,6 +310,9 @@ rsvm()
         echo "Example:"
         echo "  rsvm uninstall 0.12.0"
       fi
+      ;;
+    *)
+      rsvm
   esac
 
   echo ''
