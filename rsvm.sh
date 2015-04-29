@@ -4,6 +4,7 @@
 # To use the rsvm command source this file from your bash profile.
 
 RSVM_VERSION="0.1.0"
+RSVM_VERSION_PATTERN="((nightly(\.[0-9]+)?|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
 
 # Auto detect the NVM_DIR
 if [ ! -d "$RSVM_DIR" ]
@@ -60,15 +61,14 @@ rsvm_current()
 
 rsvm_ls()
 {
-  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
   local DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
     | sort \
-    | egrep "^$VERSION_PATTERN")
+    | egrep "^$RSVM_VERSION_PATTERN")
 
   echo "Installed versions:"
   echo ""
 
-  if [ $(egrep -o "^$VERSION_PATTERN" <<< "$DIRECTORIES" | wc -l) = 0 ]
+  if [ $(egrep -o "^$RSVM_VERSION_PATTERN" <<< "$DIRECTORIES" | wc -l) = 0 ]
   then
     echo '  -  None';
   else
@@ -172,7 +172,6 @@ rsvm_install()
 
 rsvm_ls_remote()
 {
-  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
   local ARCH=`uname -m`
   local OSTYPE=`uname -s`
   local VERSIONS
@@ -191,9 +190,9 @@ rsvm_ls_remote()
   esac
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.html -o - \
-    | command egrep -o "rust-$VERSION_PATTERN-$PLATFORM.tar.gz" \
+    | command egrep -o "rust-$RSVM_VERSION_PATTERN-$PLATFORM.tar.gz" \
     | command uniq \
-    | command egrep -o "$VERSION_PATTERN" \
+    | command egrep -o "$RSVM_VERSION_PATTERN" \
     | command sort)
   for VERSION in $VERSIONS;
   do
@@ -210,7 +209,7 @@ rsvm_uninstall()
   fi
   if [ ! -d "$RSVM_DIR/$1" ]
   then
-    echo "$! version is not installed yet... "
+    echo "$1 version is not installed yet..."
     return
   fi
   echo "uninstall $1 ..."
@@ -219,15 +218,13 @@ rsvm_uninstall()
 
 rsvm()
 {
-  local VERSION_PATTERN="((nightly|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
-
-  echo ''
-  echo 'Rust Version Manager'
-  echo '===================='
-  echo ''
 
   case $1 in
     ""|help|--help|-h)
+      echo ''
+      echo 'Rust Version Manager'
+      echo '===================='
+      echo ''
       echo 'Usage:'
       echo ''
       echo '  rsvm help | --help | -h       Show this message.'
@@ -251,7 +248,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm install 0.12.0"
-      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
+      elif ([[ "$2" =~ ^$RSVM_VERSION_PATTERN$ ]])
       then
         if [ "$3" = "--dry" ]
         then
@@ -282,7 +279,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm use 0.12.0"
-      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
+      elif ([[ "$2" =~ ^$RSVM_VERSION_PATTERN$ ]])
       then
         rsvm_use "$2"
       else
@@ -302,7 +299,7 @@ rsvm()
         echo ""
         echo "Example:"
         echo "  rsvm use 0.12.0"
-      elif ([[ "$2" =~ ^$VERSION_PATTERN$ ]])
+      elif ([[ "$2" =~ ^$RSVM_VERSION_PATTERN$ ]])
       then
         rsvm_uninstall "$2"
       else
@@ -313,6 +310,9 @@ rsvm()
         echo "Example:"
         echo "  rsvm uninstall 0.12.0"
       fi
+      ;;
+    *)
+      rsvm
   esac
 
   echo ''
