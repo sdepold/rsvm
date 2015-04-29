@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.4.0
+### Added
+- Support for nightly builds
+
 ## 0.3.0
 ### Added
 - Support for betas
