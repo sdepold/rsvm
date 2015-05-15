@@ -189,11 +189,11 @@ rsvm_ls_remote()
       ;;
   esac
 
-  VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.html -o - \
+  VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
     | command egrep -o "rust-$RSVM_VERSION_PATTERN-$PLATFORM.tar.gz" \
-    | command uniq \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
-    | command sort)
+    | command sort \
+    | command uniq)
   for VERSION in $VERSIONS;
   do
     echo $VERSION
