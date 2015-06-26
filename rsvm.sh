@@ -61,7 +61,7 @@ rsvm_current()
 
 rsvm_ls()
 {
-  local DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+  DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
     | sort \
     | egrep "^$RSVM_VERSION_PATTERN")
 
