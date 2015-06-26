@@ -55,7 +55,7 @@ rsvm_current()
     echo "N/A"
     return
   fi
-  target=`echo $(readlink $RSVM_DIR/current)|tr "/" "\n"`
+  target=`echo $(readlink $RSVM_DIR/current|tr "/" "\n")`
   echo ${target[@]} | awk '{print$NF}'
 }
 
