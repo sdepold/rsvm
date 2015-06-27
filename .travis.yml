@@ -1,8 +1,10 @@
-before_script:
-  - git clone https://github.com/sstephenson/bats.git
-  - cd bats
-  - ./install.sh ..
-  - cd ..
+sudo: false
+language: c
+cache:
+  directories:
+    - $HOME/bats
+before_install:
+  - test -f $HOME/bats/install.sh || git clone https://github.com/sstephenson/bats.git $HOME/bats
+  - bash $HOME/bats/install.sh .
 script:
   - bin/bats test/rsvm.sh.bats
-
