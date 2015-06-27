@@ -19,7 +19,7 @@ if [ ! -z "$1" ]; then
   PROFILE="$1"
 else
   if [ -f "$HOME/.bashrc" ]; then
-  PROFILE="$home/.bashrc"
+  PROFILE="$HOME/.bashrc"
   elif [ -f "$HOME/.bash_profile" ]; then
   PROFILE="$HOME/.bash_profile"
   elif [ -f "$HOME/.profile" ]; then
