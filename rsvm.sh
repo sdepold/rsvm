@@ -4,7 +4,23 @@
 # To use the rsvm command source this file from your bash profile.
 
 RSVM_VERSION="0.1.0"
-RSVM_VERSION_PATTERN="((nightly(\.[0-9]+)?|[0-9]+\.[0-9]+(\.[0-9]+)?)(-(alpha|beta)(\.[0-9]*)?)?)"
+RSVM_NIGHTLY_PATTERN="nightly(\.[0-9]+)?"
+RSVM_NORMAL_PATTERN="[0-9]+\.[0-9]+(\.[0-9]+)?(-(alpha|beta)(\.[0-9]*)?)?"
+RSVM_RC_PATTERN="$RSVM_NORMAL_PATTERN-rc(\.[0-9+])?"
+RSVM_VERSION_PATTERN="($RSVM_NIGHTLY_PATTERN|$RSVM_NORMAL_PATTERN|$RSVM_RC_PATTERN)"
+
+RSVM_ARCH=`uname -m`
+RSVM_OSTYPE=`uname -s`
+case $RSVM_OSTYPE in
+  Linux)
+    RSVM_PLATFORM=$RSVM_ARCH-unknown-linux-gnu
+    ;;
+  Darwin)
+    RSVM_PLATFORM=$RSVM_ARCH-apple-darwin
+    ;;
+  *)
+    ;;
+esac
 
 # Auto detect the NVM_DIR
 if [ ! -d "$RSVM_DIR" ]
@@ -97,106 +113,134 @@ rsvm_init_folder_structure()
 rsvm_install()
 {
   local CURRENT_DIR=`pwd`
-  local version
-
+  local target=$1
+  local dirname
+  local url_prefix
 
   if [[ $1 = "nightly" ]]
   then
-    version=nightly.`date "+%Y%m%d%H%M%S"`
+    dirname=nightly.`date "+%Y%m%d%H%M%S"`
+  elif [ ${1: -3} = '-rc' ]
+  then
+    dirname=$1
+    target=${1%%-rc}
+    url_prefix='/staging'
+    echo $target
   else
-    version=$1
+    dirname=$1
   fi
-  rsvm_init_folder_structure $version
-  local SRC="$RSVM_DIR/$version/src"
-  local DIST="$RSVM_DIR/$version/dist"
+  rsvm_init_folder_structure $dirname
+  local SRC="$RSVM_DIR/$dirname/src"
+  local DIST="$RSVM_DIR/$dirname/dist"
 
   cd $SRC
 
-  local ARCH=`uname -m`
-  local OSTYPE=`uname -s`
-  case $OSTYPE in
-    Linux)
-      PLATFORM=$ARCH-unknown-linux-gnu
-      ;;
-    Darwin)
-      PLATFORM=$ARCH-apple-darwin
-      ;;
-    *)
-      echo "rsvm: Not support this platform, $OSTYPE"
-      return
-      ;;
-  esac
-
-  if [ -f "rust-$1-$PLATFORM.tar.gz" ]
+  if [ -z $RSVM_PLATFORM ]
   then
-    echo "Sources for rust $version already downloaded ..."
+    echo "rsvm: Not support this platform, $RSVM_OSTYPE"
+    return
+  fi
+
+  if [ -f "rust-$target-$RSVM_PLATFORM.tar.gz" ]
+  then
+    echo "Sources for rust $dirname already downloaded ..."
   else
-    echo -n "Downloading sources for rust $version ... "
-    curl -o "rust-$1-$PLATFORM.tar.gz" "https://static.rust-lang.org/dist/rust-$1-$PLATFORM.tar.gz"
+    echo "Downloading sources for rust $dirname ... "
+    curl -o "rust-$target-$RSVM_PLATFORM.tar.gz" "https://static.rust-lang.org/dist$url_prefix/rust-$target-$RSVM_PLATFORM.tar.gz"
+  fi
+
+  if [ -e "rust-$target" ]
+  then
+    echo "Sources for rust $dirname already extracted ..."
+  else
+    echo -n "Extracting source ... "
+    tar -xzf "rust-$target-$RSVM_PLATFORM.tar.gz"
+    mv "rust-$target-$RSVM_PLATFORM" "rust-$target"
     echo "done"
   fi
 
-  if [ -e "rust-$1" ]
+  if [ ! -f $SRC/rust-$target/bin/cargo ] && [ ! -f $SRC/rust-$target/cargo/bin/cargo ]
   then
-    echo "Sources for rust $version already extracted ..."
-  else
-    echo -n "Extracting source ... "
-    tar -xzf "rust-$1-$PLATFORM.tar.gz"
-    mv "rust-$1-$PLATFORM" "rust-$1"
-    echo "done"
-  fi
-
-  if [ ! -f $SRC/rust-$1/bin/cargo ]
-  then
-    echo -n "Downloading sources for cargo nightly ... "
-    curl -o "cargo-nightly-$PLATFORM.tar.gz" "https://static.rust-lang.org/cargo-dist/cargo-nightly-$PLATFORM.tar.gz"
-    echo "done"
+    echo "Downloading sources for cargo nightly ... "
+    curl -o "cargo-nightly-$RSVM_PLATFORM.tar.gz" "https://static.rust-lang.org/cargo-dist/cargo-nightly-$RSVM_PLATFORM.tar.gz"
 
     echo -n "Extracting source ... "
-    tar -xzf "cargo-nightly-$PLATFORM.tar.gz"
-    mv "cargo-nightly-$PLATFORM" "cargo-nightly"
+    tar -xzf "cargo-nightly-$RSVM_PLATFORM.tar.gz"
+    mv "cargo-nightly-$RSVM_PLATFORM" "cargo-nightly"
     echo "done"
 
     cd "$SRC/cargo-nightly"
     sh install.sh --prefix=$DIST
   fi
 
-  cd "$SRC/rust-$1"
+  cd "$SRC/rust-$target"
   sh install.sh --prefix=$DIST
 
   echo ""
-  echo "And we are done. Have fun using rust $version."
+  echo "And we are done. Have fun using rust $dirname."
 
   cd $CURRENT_DIR
 }
 
 rsvm_ls_remote()
 {
-  local ARCH=`uname -m`
-  local OSTYPE=`uname -s`
   local VERSIONS
-  local PLATFORM
-  case $OSTYPE in
-    Linux)
-      PLATFORM=$ARCH-unknown-linux-gnu
-      ;;
-    Darwin)
-      PLATFORM=$ARCH-apple-darwin
-      ;;
-    *)
-      echo "rsvm: Not support this platform, $OSTYPE"
-      return
-      ;;
-  esac
+
+  if [ -z $RSVM_PLATFORM ]
+  then
+    echo "rsvm: Not support this platform, $RSVM_OSTYPE"
+    return
+  fi
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
-    | command egrep -o "rust-$RSVM_VERSION_PATTERN-$PLATFORM.tar.gz" \
+    | command egrep -o "dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
     | command sort \
     | command uniq)
   for VERSION in $VERSIONS;
   do
     echo $VERSION
+  done
+  rsvm_ls_channel staging
+  rsvm_ls_channel nightly
+}
+
+rsvm_ls_channel()
+{
+  local VERSIONS
+  local POSTFIX
+
+  if [ -z $RSVM_PLATFORM ]
+  then
+    echo "rsvm: Not support this platform, $RSVM_OSTYPE"
+    return
+  fi
+
+  case $1 in
+    staging|rc)
+      POSTFIX='-rc'
+      VERSIONS=$(curl -s http://static.rust-lang.org/dist/staging/channel-rust-stable -o - \
+        | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
+        | command egrep -o "$RSVM_VERSION_PATTERN" \
+        | command sort \
+        | command uniq)
+      ;;
+    stable|nightly)
+      VERSIONS=$(curl -s http://static.rust-lang.org/dist/channel-rust-$1 -o - \
+        | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
+        | command egrep -o "$RSVM_VERSION_PATTERN" \
+        | command sort \
+        | command uniq)
+      ;;
+    *)
+      echo "rsvm: Not support this channel, $1"
+      return
+      ;;
+  esac
+
+  for VERSION in $VERSIONS;
+  do
+    echo $VERSION$POSTFIX
   done
 }
 
@@ -234,6 +278,7 @@ rsvm()
       echo '  rsvm use <version>            Activate <version> for now and the future.'
       echo '  rsvm ls | list                List all installed versions of rust.'
       echo '  rsvm ls-remote                List remote versions available for install.'
+      echo '  rsvm ls-channel               Print a channel version available for install.'
       echo ''
       echo "Current version: $RSVM_VERSION"
       ;;
@@ -270,6 +315,18 @@ rsvm()
       ;;
     ls-remote)
       rsvm_ls_remote
+      ;;
+    ls-channel)
+      if [ -z "$2" ]
+      then
+        # whoops. no channel found!
+        echo "Please define a channel of rust!"
+        echo ""
+        echo "Example:"
+        echo "  rsvm ls-channel stable"
+      else
+        rsvm_ls_channel $2
+      fi
       ;;
     use)
       if [ -z "$2" ]

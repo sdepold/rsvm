@@ -63,6 +63,12 @@ List all versions of rust that are available for installation.
 rsvm ls-remote
 ```
 
+Print a channel version of rust that is available for installation.
+
+```console
+rsvm ls-channel stable
+```
+
 ## Example: Install 0.12.0
 
 ```console
