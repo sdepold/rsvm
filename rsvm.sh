@@ -257,7 +257,15 @@ rsvm_uninstall()
     return
   fi
   echo "uninstall $1 ..."
-  rm -rI "$RSVM_DIR/$1"
+
+  case $RSVM_OSTYPE in
+    Darwin)
+      rm -ri "$RSVM_DIR/$1"
+      ;;
+    *)
+      rm -rI "$RSVM_DIR/$1"
+      ;;
+  esac
 }
 
 rsvm()
