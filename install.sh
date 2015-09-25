@@ -17,6 +17,8 @@ echo
 # Detect profile file, .bash_profile has precedence over .profile
 if [ ! -z "$1" ]; then
   PROFILE="$1"
+elif [ ! -n "$ZSH_NAME" ] || [ ! -n "$ZSH" ]; then
+  PROFILE="$HOME/.zshrc"
 else
   if [ -f "$HOME/.bashrc" ]; then
   PROFILE="$HOME/.bashrc"
