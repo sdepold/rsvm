@@ -124,7 +124,7 @@ rsvm_install()
   then
     dirname=$1
     target=${1%%-rc}
-    url_prefix='/staging'
+    url_prefix='/staging/dist'
     echo $target
   else
     dirname=$1
@@ -193,7 +193,7 @@ rsvm_ls_remote()
   fi
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
-    | command egrep -o "dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
+    | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
     | command sort \
     | command uniq)
@@ -217,9 +217,9 @@ rsvm_ls_channel()
   fi
 
   case $1 in
-    staging|rc)
+    staging|rc|beta)
       POSTFIX='-rc'
-      VERSIONS=$(curl -s http://static.rust-lang.org/dist/staging/channel-rust-stable -o - \
+      VERSIONS=$(curl -s http://static.rust-lang.org/dist/staging/dist/channel-rust-stable -o - \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
         | command sort \
