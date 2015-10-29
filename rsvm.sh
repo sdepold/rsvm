@@ -193,7 +193,7 @@ rsvm_ls_remote()
   fi
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
-    | command egrep -o "dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
+    | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
     | command sort \
     | command uniq)
