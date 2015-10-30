@@ -185,12 +185,15 @@ rsvm_install()
 rsvm_ls_remote()
 {
   local VERSIONS
+  local STABLE_VERSION
 
   if [ -z $RSVM_PLATFORM ]
   then
     echo "rsvm: Not support this platform, $RSVM_OSTYPE"
     return
   fi
+
+  STABLE_VERSION=$(rsvm_ls_channel stable)
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
     | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
@@ -199,8 +202,14 @@ rsvm_ls_remote()
     | command uniq)
   for VERSION in $VERSIONS;
   do
+    if [ "$STABLE_VERSION" = "$VERSION" ]
+    then
+      echo "true"
+      continue
+    fi
     echo $VERSION
   done
+  echo $STABLE_VERSION
   rsvm_ls_channel staging
   rsvm_ls_channel nightly
 }
