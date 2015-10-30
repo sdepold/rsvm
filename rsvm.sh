@@ -5,9 +5,10 @@
 
 RSVM_VERSION="0.1.0"
 RSVM_NIGHTLY_PATTERN="nightly(\.[0-9]+)?"
+RSVM_BETA_PATTERN="beta(\.[0-9]+)?"
 RSVM_NORMAL_PATTERN="[0-9]+\.[0-9]+(\.[0-9]+)?(-(alpha|beta)(\.[0-9]*)?)?"
-RSVM_RC_PATTERN="$RSVM_NORMAL_PATTERN-rc(\.[0-9+])?"
-RSVM_VERSION_PATTERN="($RSVM_NIGHTLY_PATTERN|$RSVM_NORMAL_PATTERN|$RSVM_RC_PATTERN)"
+RSVM_RC_PATTERN="$RSVM_NORMAL_PATTERN-rc(\.[0-9]+)?"
+RSVM_VERSION_PATTERN="($RSVM_NIGHTLY_PATTERN|$RSVM_NORMAL_PATTERN|$RSVM_RC_PATTERN|$RSVM_BETA_PATTERN)"
 
 RSVM_ARCH=`uname -m`
 RSVM_OSTYPE=`uname -s`
@@ -120,9 +121,12 @@ rsvm_install()
   if [[ $1 = "nightly" ]]
   then
     dirname=nightly.`date "+%Y%m%d%H%M%S"`
+  elif [[ $1 = "beta" ]]
+  then
+    dirname=beta.`date "+%Y%m%d%H%M%S"`
   elif [ ${1: -3} = '-rc' ]
   then
-    dirname=$1
+    dirname=$1.`date "+%Y%m%d%H%M%S"`
     target=${1%%-rc}
     url_prefix='/staging/dist'
     echo $target
@@ -185,12 +189,15 @@ rsvm_install()
 rsvm_ls_remote()
 {
   local VERSIONS
+  local STABLE_VERSION
 
   if [ -z $RSVM_PLATFORM ]
   then
     echo "rsvm: Not support this platform, $RSVM_OSTYPE"
     return
   fi
+
+  STABLE_VERSION=$(rsvm_ls_channel stable)
 
   VERSIONS=$(curl -s http://static.rust-lang.org/dist/index.txt -o - \
     | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
@@ -199,9 +206,16 @@ rsvm_ls_remote()
     | command uniq)
   for VERSION in $VERSIONS;
   do
+    if [ "$STABLE_VERSION" = "$VERSION" ]
+    then
+      echo "true"
+      continue
+    fi
     echo $VERSION
   done
+  echo $STABLE_VERSION
   rsvm_ls_channel staging
+  rsvm_ls_channel beta
   rsvm_ls_channel nightly
 }
 
@@ -217,7 +231,7 @@ rsvm_ls_channel()
   fi
 
   case $1 in
-    staging|rc|beta)
+    staging|rc)
       POSTFIX='-rc'
       VERSIONS=$(curl -s http://static.rust-lang.org/dist/staging/dist/channel-rust-stable -o - \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
@@ -225,7 +239,7 @@ rsvm_ls_channel()
         | command sort \
         | command uniq)
       ;;
-    stable|nightly)
+    stable|beta|nightly)
       VERSIONS=$(curl -s http://static.rust-lang.org/dist/channel-rust-$1 -o - \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
