@@ -208,7 +208,6 @@ rsvm_ls_remote()
   do
     if [ "$STABLE_VERSION" = "$VERSION" ]
     then
-      echo "true"
       continue
     fi
     echo $VERSION
