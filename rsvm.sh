@@ -322,6 +322,7 @@ rsvm()
         else
           rsvm_install "$2"
         fi
+        rsvm_use $2
       else
         # the version was defined in a the wrong format.
         echo "You defined a version of rust in a wrong format!"
