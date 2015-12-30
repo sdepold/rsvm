@@ -152,6 +152,17 @@ function cleanup()
   cleanup
 }
 
+@test "'rsvm install 0.5' will activate automatic" {
+  cleanup
+  # dry run not make directory
+  run rsvm_init_folder_structure 0.5
+  run rsvm install 0.5 --dry
+  run rsvm ls
+  [ "${lines[0]}" = "Installed versions:" ]
+  [ "${lines[1]}" = "  =>  0.5" ]
+  cleanup
+}
+
 @test "'rsvm uninstall 0.1' will notify the user about a not installed version" {
   cleanup
   run rsvm uninstall 0.1
