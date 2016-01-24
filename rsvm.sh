@@ -83,6 +83,7 @@ export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 export MANPATH=$(rsvm_append_path $MANPATH $RSVM_DIR/current/dist/share/man)
+export RUST_SRC_PATH=$(rsvm_append_path $RUST_SRC_PATH $RSVM_DIR/current/src/rustc-source/src)
 
 rsvm_use()
 {
@@ -153,6 +154,7 @@ rsvm_install()
 {
   local CURRENT_DIR=`pwd`
   local target=$1
+  local with_rustc_source=$2
   local dirname
   local url_prefix
   local LAST_VERSION
@@ -205,6 +207,23 @@ rsvm_install()
     tar -xzf "rust-$target-$RSVM_PLATFORM.tar.gz"
     mv "rust-$target-$RSVM_PLATFORM" "rust-$target"
     echo "done"
+  fi
+
+  if [ "$with_rustc_source" = true ]
+  then
+    echo "Downloading sources for rustc sourcecode $dirname ... "
+    rsvm_file_download \
+      "https://static.rust-lang.org/dist$url_prfix/rustc-$target-src.tar.gz" \
+      "rustc-$target-src.tar.gz" \
+      true
+    if [ -e "rustc-source" ]
+    then
+      echo "Sources for rustc $dirname already extracted ..."
+    else
+      echo -n "Extracting source ... "
+      tar -xzf "rustc-$target-src.tar.gz"
+      mv "rustc-$target" "rustc-source"
+    fi
   fi
 
   if [ ! -f $SRC/rust-$target/bin/cargo ] && [ ! -f $SRC/rust-$target/cargo/bin/cargo ]
@@ -366,13 +385,25 @@ rsvm()
         echo "  rsvm install 0.12.0"
       elif ([[ "$2" =~ ^$RSVM_VERSION_PATTERN$ ]])
       then
-        if [ "$3" = "--dry" ]
-        then
-          echo "Would install rust $2"
-          RSVM_LAST_INSTALLED_VERSION=$2
-        else
-          rsvm_install "$2"
-        fi
+        local version=$2
+        local with_rustc_source=false
+        for i in ${@:3:${#@}}
+        do
+          case $i in
+            --dry)
+              echo "Would install rust $version"
+              RSVM_LAST_INSTALLED_VERSION=$version
+              rsvm_use $RSVM_LAST_INSTALLED_VERSION
+              exit
+              ;;
+            --with-rustc-source)
+              with_rustc_source=true
+              ;;
+            *)
+              ;;
+          esac
+        done
+        rsvm_install "$version" "$with_rustc_source"
         rsvm_use $RSVM_LAST_INSTALLED_VERSION
       else
         # the version was defined in a the wrong format.
