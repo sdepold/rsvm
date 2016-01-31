@@ -386,7 +386,7 @@ rsvm()
       elif ([[ "$2" =~ ^$RSVM_VERSION_PATTERN$ ]])
       then
         local version=$2
-        local with_rustc_source=false
+        local with_rustc_source=true
         for i in ${@:3:${#@}}
         do
           case $i in
@@ -396,8 +396,8 @@ rsvm()
               rsvm_use $RSVM_LAST_INSTALLED_VERSION
               exit
               ;;
-            --with-rustc-source)
-              with_rustc_source=true
+            --without-rustc-source)
+              with_rustc_source=false
               ;;
             *)
               ;;
