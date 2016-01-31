@@ -83,7 +83,13 @@ export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
 export MANPATH=$(rsvm_append_path $MANPATH $RSVM_DIR/current/dist/share/man)
-export RUST_SRC_PATH=$(rsvm_append_path $RUST_SRC_PATH $RSVM_DIR/current/src/rustc-source/src)
+export RSVM_SRC_PATH="$RSVM_DIR/current/src/rustc-source/src"
+if [ -e "$RSVM_SRC_PATH" ]
+then
+  export RUST_SRC_PATH="$RSVM_SRC_PATH"
+else
+  unset RUST_SRC_PATH
+fi
 
 rsvm_use()
 {
