@@ -49,6 +49,8 @@ function rsvm_mod_env
     return $rsvmstat
   end
 
+  rsvm_set RUST_SRC_PATH
+
   for e in (cat $tmpnew)
     set p (rsvm_split_env $e)
 
@@ -71,7 +73,7 @@ function rsvm_mod_env
     else if test $p[1] = MANPATH
       rsvm_set_path MANPATH $p[2..-1]
     else if test $p[1] = RUST_SRC_PATH
-      rsvm_set_path RUST_SRC_PATH $p[2..-1]
+      rsvm_set RUST_SRC_PATH $p[2..-1]
     end
   end
 
@@ -81,7 +83,7 @@ end
 function rsvm
   set -g tmpdir (mktemp -d 2>/dev/null; or mktemp -d -t 'rsvm-wrapper') # Linux || OS X
   set -g tmpold $tmpdir/oldenv
-  env | grep -E '^((rsvm|NODE)_|(MAN)?PATH=)' > $tmpold
+  env | grep -E '^((rsvm|RUST)_|(MAN)?PATH=)' > $tmpold
 
   set -l arg1 $argv[1]
   if echo $arg1 | grep -qE '^(use|install|deactivate)$'
