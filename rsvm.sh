@@ -24,7 +24,7 @@ case $RSVM_OSTYPE in
     ;;
 esac
 
-# Auto detect the NVM_DIR
+# Auto detect the RSVM_DIR
 if [ ! -d "$RSVM_DIR" ]
 then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
@@ -93,12 +93,12 @@ fi
 
 rsvm_use()
 {
-  if [ -e "$RSVM_DIR/$1" ]
+  if [ -e "$RSVM_DIR/versions/$1" ]
   then
     echo -n "Activating rust $1 ... "
 
     rm -rf $RSVM_DIR/current
-    ln -s $RSVM_DIR/$1 $RSVM_DIR/current
+    ln -s $RSVM_DIR/versions/$1 $RSVM_DIR/current
     source $RSVM_DIR/rsvm.sh
 
     echo "done"
@@ -150,8 +150,8 @@ rsvm_init_folder_structure()
 {
   echo -n "Creating the respective folders for rust $1 ... "
 
-  mkdir -p "$RSVM_DIR/$1/src"
-  mkdir -p "$RSVM_DIR/$1/dist"
+  mkdir -p "$RSVM_DIR/versions/$1/src"
+  mkdir -p "$RSVM_DIR/versions/$1/dist"
 
   echo "done"
 }
@@ -177,7 +177,7 @@ rsvm_install()
     LAST_VERSION=$(rsvm_ls|grep $1|tail -n 1|awk '{print $2}')
     if [ $(rsvm_check_etag \
              "https://static.rust-lang.org/dist$url_prfix/rust-$target-$RSVM_PLATFORM.tar.gz" \
-             "$RSVM_DIR/$LAST_VERSION/src/rust-$target-$RSVM_PLATFORM.tar.gz") = 1 ]
+             "$RSVM_DIR/versions/$LAST_VERSION/src/rust-$target-$RSVM_PLATFORM.tar.gz") = 1 ]
     then
       dirname=$LAST_VERSION
     else
@@ -188,8 +188,8 @@ rsvm_install()
   fi
 
   rsvm_init_folder_structure $dirname
-  local SRC="$RSVM_DIR/$dirname/src"
-  local DIST="$RSVM_DIR/$dirname/dist"
+  local SRC="$RSVM_DIR/versions/$dirname/src"
+  local DIST="$RSVM_DIR/versions/$dirname/dist"
 
   cd $SRC
 
@@ -339,7 +339,7 @@ rsvm_uninstall()
     echo "rsvm: Cannot uninstall currently-active version, $1"
     return
   fi
-  if [ ! -d "$RSVM_DIR/$1" ]
+  if [ ! -d "$RSVM_DIR/versions/$1" ]
   then
     echo "$1 version is not installed yet..."
     return
@@ -348,10 +348,10 @@ rsvm_uninstall()
 
   case $RSVM_OSTYPE in
     Darwin)
-      rm -ri "$RSVM_DIR/$1"
+      rm -ri "$RSVM_DIR/versions/$1"
       ;;
     *)
-      rm -rI "$RSVM_DIR/$1"
+      rm -rI "$RSVM_DIR/versions/$1"
       ;;
   esac
 }
