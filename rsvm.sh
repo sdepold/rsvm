@@ -10,6 +10,7 @@ RSVM_NORMAL_PATTERN="[0-9]+\.[0-9]+(\.[0-9]+)?(-(alpha|beta)(\.[0-9]*)?)?"
 RSVM_RC_PATTERN="$RSVM_NORMAL_PATTERN-rc(\.[0-9]+)?"
 RSVM_VERSION_PATTERN="($RSVM_NIGHTLY_PATTERN|$RSVM_NORMAL_PATTERN|$RSVM_RC_PATTERN|$RSVM_BETA_PATTERN)"
 RSVM_LAST_INSTALLED_VERSION=
+RSVM_SCRIPT=${BASH_SOURCE[0]}
 
 RSVM_ARCH=`uname -m`
 RSVM_OSTYPE=`uname -s`
@@ -24,11 +25,38 @@ case $RSVM_OSTYPE in
     ;;
 esac
 
-# Auto detect the NVM_DIR
+# Auto detect the RSVM_DIR
 if [ ! -d "$RSVM_DIR" ]
 then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
+
+rsvm_initialize()
+{
+  if [ ! -d "$RSVM_DIR/versions" ]
+  then
+    mkdir -p "$RSVM_DIR/versions"
+  fi
+  if [ ! -f "$RSVM_DIR/.rsvm_version" ]
+  then
+    touch "$RSVM_DIR/.rsvm_version"
+  fi
+  local rsvm_version=$(cat "$RSVM_DIR/.rsvm_version")
+  if [ -z "$rsvm_version" ]
+  then
+    local DIRECTORIES=$(find "$RSVM_DIR" -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+      | sort \
+      | egrep "^$RSVM_VERSION_PATTERN")
+
+    mkdir -p "$RSVM_DIR/versions"
+    for line in $(echo $DIRECTORIES | tr " " "\n")
+    do
+      mv "$RSVM_DIR/$line" "$RSVM_DIR/versions"
+    done
+  fi
+  echo "1" > "$RSVM_DIR/.rsvm_version"
+}
+
 
 rsvm_check_etag()
 {
@@ -79,10 +107,10 @@ rsvm_append_path()
   echo $newpath
 }
 
-export PATH=$(rsvm_append_path $PATH $RSVM_DIR/current/dist/bin)
-export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
-export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH $RSVM_DIR/current/dist/lib)
-export MANPATH=$(rsvm_append_path $MANPATH $RSVM_DIR/current/dist/share/man)
+export PATH=$(rsvm_append_path $PATH "$RSVM_DIR/current/dist/bin")
+export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
+export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
+export MANPATH=$(rsvm_append_path $MANPATH "$RSVM_DIR/current/dist/share/man")
 export RSVM_SRC_PATH="$RSVM_DIR/current/src/rustc-source/src"
 if [ -e "$RSVM_SRC_PATH" ]
 then
@@ -93,13 +121,13 @@ fi
 
 rsvm_use()
 {
-  if [ -e "$RSVM_DIR/$1" ]
+  if [ -e "$RSVM_DIR/versions/$1" ]
   then
     echo -n "Activating rust $1 ... "
 
-    rm -rf $RSVM_DIR/current
-    ln -s $RSVM_DIR/$1 $RSVM_DIR/current
-    source $RSVM_DIR/rsvm.sh
+    rm -rf "$RSVM_DIR/current"
+    ln -s "$RSVM_DIR/versions/$1" "$RSVM_DIR/current"
+    source $RSVM_SCRIPT
 
     echo "done"
   else
@@ -112,18 +140,18 @@ rsvm_use()
 
 rsvm_current()
 {
-  if [ ! -e $RSVM_DIR/current ]
+  if [ ! -e "$RSVM_DIR/current" ]
   then
     echo "N/A"
     return
   fi
-  target=`echo $(readlink $RSVM_DIR/current|tr "/" "\n")`
+  target=`echo $(readlink "$RSVM_DIR/current"|tr "/" "\n")`
   echo ${target[@]} | awk '{print$NF}'
 }
 
 rsvm_ls()
 {
-  DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+  DIRECTORIES=$(find "$RSVM_DIR/versions" -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
     | sort \
     | egrep "^$RSVM_VERSION_PATTERN")
 
@@ -150,8 +178,8 @@ rsvm_init_folder_structure()
 {
   echo -n "Creating the respective folders for rust $1 ... "
 
-  mkdir -p "$RSVM_DIR/$1/src"
-  mkdir -p "$RSVM_DIR/$1/dist"
+  mkdir -p "$RSVM_DIR/versions/$1/src"
+  mkdir -p "$RSVM_DIR/versions/$1/dist"
 
   echo "done"
 }
@@ -177,7 +205,7 @@ rsvm_install()
     LAST_VERSION=$(rsvm_ls|grep $1|tail -n 1|awk '{print $2}')
     if [ $(rsvm_check_etag \
              "https://static.rust-lang.org/dist$url_prfix/rust-$target-$RSVM_PLATFORM.tar.gz" \
-             "$RSVM_DIR/$LAST_VERSION/src/rust-$target-$RSVM_PLATFORM.tar.gz") = 1 ]
+             "$RSVM_DIR/versions/$LAST_VERSION/src/rust-$target-$RSVM_PLATFORM.tar.gz") = 1 ]
     then
       dirname=$LAST_VERSION
     else
@@ -188,8 +216,8 @@ rsvm_install()
   fi
 
   rsvm_init_folder_structure $dirname
-  local SRC="$RSVM_DIR/$dirname/src"
-  local DIST="$RSVM_DIR/$dirname/dist"
+  local SRC="$RSVM_DIR/versions/$dirname/src"
+  local DIST="$RSVM_DIR/versions/$dirname/dist"
 
   cd $SRC
 
@@ -271,7 +299,7 @@ rsvm_ls_remote()
   fi
 
   STABLE_VERSION=$(rsvm_ls_channel stable)
-  rsvm_file_download http://static.rust-lang.org/dist/index.txt $RSVM_DIR/cache/index.txt
+  rsvm_file_download http://static.rust-lang.org/dist/index.txt "$RSVM_DIR/cache/index.txt"
   VERSIONS=$(cat "$RSVM_DIR/cache/index.txt" \
     | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
@@ -305,16 +333,16 @@ rsvm_ls_channel()
   case $1 in
     staging|rc)
       POSTFIX='-rc'
-      rsvm_file_download http://static.rust-lang.org/dist/staging/dist/channel-rust-stable $RSVM_DIR/cache/channel-rust-staging
-      VERSIONS=$(cat $RSVM_DIR/cache/channel-rust-staging \
+      rsvm_file_download http://static.rust-lang.org/dist/staging/dist/channel-rust-stable "$RSVM_DIR/cache/channel-rust-staging"
+      VERSIONS=$(cat "$RSVM_DIR/cache/channel-rust-staging" \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
         | command sort \
         | command uniq)
       ;;
     stable|beta|nightly)
-      rsvm_file_download http://static.rust-lang.org/dist/channel-rust-$1 $RSVM_DIR/cache/channel-rust-$1
-      VERSIONS=$(cat $RSVM_DIR/cache/channel-rust-$1 \
+      rsvm_file_download http://static.rust-lang.org/dist/channel-rust-$1 "$RSVM_DIR/cache/channel-rust-$1"
+      VERSIONS=$(cat "$RSVM_DIR/cache/channel-rust-$1" \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
         | command sort \
@@ -339,7 +367,7 @@ rsvm_uninstall()
     echo "rsvm: Cannot uninstall currently-active version, $1"
     return
   fi
-  if [ ! -d "$RSVM_DIR/$1" ]
+  if [ ! -d "$RSVM_DIR/versions/$1" ]
   then
     echo "$1 version is not installed yet..."
     return
@@ -348,16 +376,17 @@ rsvm_uninstall()
 
   case $RSVM_OSTYPE in
     Darwin)
-      rm -ri "$RSVM_DIR/$1"
+      rm -ri "$RSVM_DIR/versions/$1"
       ;;
     *)
-      rm -rI "$RSVM_DIR/$1"
+      rm -rI "$RSVM_DIR/versions/$1"
       ;;
   esac
 }
 
 rsvm()
 {
+  rsvm_initialize
 
   case $1 in
     ""|help|--help|-h)
