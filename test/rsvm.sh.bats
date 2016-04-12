@@ -8,8 +8,8 @@ export RSVM_DIR=`pwd`
 
 function cleanup()
 {
-  rm -rf `pwd`/0.*
-  rm -rf `pwd`/nightly*
+  rm -rf `pwd`/versions/0.*
+  rm -rf `pwd`/versions/nightly*
   rm -rf `pwd`/current
 }
 
