@@ -4,13 +4,11 @@
 source ./rsvm.sh
 
 # override the RSVM_DIR
-export RSVM_DIR=`pwd`
+export RSVM_DIR=`pwd`/bats_test
 
 function cleanup()
 {
-  rm -rf `pwd`/versions/0.*
-  rm -rf `pwd`/versions/nightly*
-  rm -rf `pwd`/current
+  rm -rf $RSVM_DIR
 }
 
 @test "'rsvm' prints the help" {
