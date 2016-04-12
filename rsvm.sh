@@ -30,6 +30,33 @@ then
   export RSVM_DIR=$(cd $(dirname ${BASH_SOURCE[0]:-$0}) && pwd)
 fi
 
+rsvm_initialize()
+{
+  if [ -d "$RSVM_DIR/versions" ]
+  then
+    return
+  elif [ ! -d "$RSVM_DIR" ]
+  then
+    mkdir -p "$RSVM_DIR/versions"
+    return
+  fi
+
+  DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+    | sort \
+    | egrep "^$RSVM_VERSION_PATTERN")
+
+  mkdir -p "$RSVM_DIR/versions"
+  if [ $(egrep -o "^$RSVM_VERSION_PATTERN" <<< "$DIRECTORIES" | wc -l) = 0 ]
+  then
+    return
+  fi
+  for line in $(echo $DIRECTORIES | tr " " "\n")
+  do
+    mv "$RSVM_DIR/$line" "$RSVM_DIR/versions"
+  done
+}
+
+
 rsvm_check_etag()
 {
   if [ -f $2.etag ]
@@ -123,7 +150,7 @@ rsvm_current()
 
 rsvm_ls()
 {
-  DIRECTORIES=$(find $RSVM_DIR -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
+  DIRECTORIES=$(find "$RSVM_DIR/versions" -maxdepth 1 -mindepth 1 -type d -exec basename '{}' \; \
     | sort \
     | egrep "^$RSVM_VERSION_PATTERN")
 
@@ -358,6 +385,7 @@ rsvm_uninstall()
 
 rsvm()
 {
+  rsvm_initialize
 
   case $1 in
     ""|help|--help|-h)
