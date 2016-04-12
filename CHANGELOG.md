@@ -1,6 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.5.0
+### Added
+- Add `rsvm ls-channel` command (#14)
+- Automatic activate after install new version set (#22)
+- Cache download datas (#23)
+- `rsvm install` have new suboption about install rustc source code (#26, #28, #29)
+
+### Changed
+- Change default profile file to .bashrc (#9, #12, #17)
+- Fix script issue in the zsh (#10, #11)
+- Improve travis settings (#13)
+- Fix uninstall command on the OSX (#16)
+- Fix version lookup (#18, #19)
+- Move version directories to subdirectory (#30, #31)
+
 ## 0.4.1
 ### Changed
 - Fix version lookup
