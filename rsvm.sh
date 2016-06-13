@@ -299,7 +299,7 @@ rsvm_ls_remote()
   fi
 
   STABLE_VERSION=$(rsvm_ls_channel stable)
-  rsvm_file_download http://static.rust-lang.org/dist/index.txt "$RSVM_DIR/cache/index.txt"
+  rsvm_file_download https://static.rust-lang.org/dist/index.txt "$RSVM_DIR/cache/index.txt"
   VERSIONS=$(cat "$RSVM_DIR/cache/index.txt" \
     | command egrep -o "^/dist/rust-$RSVM_NORMAL_PATTERN-$RSVM_PLATFORM.tar.gz" \
     | command egrep -o "$RSVM_VERSION_PATTERN" \
@@ -333,7 +333,7 @@ rsvm_ls_channel()
   case $1 in
     staging|rc)
       POSTFIX='-rc'
-      rsvm_file_download http://static.rust-lang.org/dist/staging/dist/channel-rust-stable "$RSVM_DIR/cache/channel-rust-staging"
+      rsvm_file_download https://static.rust-lang.org/dist/staging/dist/channel-rust-stable "$RSVM_DIR/cache/channel-rust-staging"
       VERSIONS=$(cat "$RSVM_DIR/cache/channel-rust-staging" \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
@@ -341,7 +341,7 @@ rsvm_ls_channel()
         | command uniq)
       ;;
     stable|beta|nightly)
-      rsvm_file_download http://static.rust-lang.org/dist/channel-rust-$1 "$RSVM_DIR/cache/channel-rust-$1"
+      rsvm_file_download https://static.rust-lang.org/dist/channel-rust-$1 "$RSVM_DIR/cache/channel-rust-$1"
       VERSIONS=$(cat "$RSVM_DIR/cache/channel-rust-$1" \
         | command egrep -o "rust-$RSVM_VERSION_PATTERN-$RSVM_PLATFORM.tar.gz" \
         | command egrep -o "$RSVM_VERSION_PATTERN" \
