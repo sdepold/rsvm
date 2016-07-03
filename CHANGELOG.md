@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## 0.5.1
+### Changed
+- Switch rust-lang.org URLs to HTTPS (#32)
+- Fix cannot use `rsvm use` on the zsh (#34)
+
 ## 0.5.0
 ### Added
 - Add `rsvm ls-channel` command (#14)

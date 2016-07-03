@@ -3,7 +3,7 @@
 #
 # To use the rsvm command source this file from your bash profile.
 
-RSVM_VERSION="0.5.0"
+RSVM_VERSION="0.5.1"
 RSVM_NIGHTLY_PATTERN="nightly(\.[0-9]+)?"
 RSVM_BETA_PATTERN="beta(\.[0-9]+)?"
 RSVM_NORMAL_PATTERN="[0-9]+\.[0-9]+(\.[0-9]+)?(-(alpha|beta)(\.[0-9]*)?)?"
