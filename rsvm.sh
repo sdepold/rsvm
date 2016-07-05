@@ -67,12 +67,22 @@ rsvm_initialize()
 
 rsvm_check_etag()
 {
+  # Check which md5sum to use
+  if [ -f "$(which md5sum)" ]; then
+      MD5=md5sum
+  elif [ -f "$(which md5)" ]; then
+      MD5=md5
+  else
+      echo "md5sum not found!"
+      exit 1
+  fi
+
   if [ -f $2.etag ]
   then
     curl -s -I -H "If-None-Match:$(cat $2.etag)" $1 | grep 304 | wc -l
   elif [ -f $2 ]
   then
-    local ETAG=$(md5sum $2 | awk '{print $1}')
+    local ETAG=$($MD5 $2 | awk '{print $1}')
     curl -s -I -H "If-None-Match:\"$ETAG\"" $1 | grep 304 | wc -l
   else
     echo 0
