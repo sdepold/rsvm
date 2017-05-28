@@ -101,6 +101,8 @@ rsvm_file_download()
     OPTS='-s'
   fi
 
+  #echo $1 $2
+
   if [ $(rsvm_check_etag $1 $2) = 0 ]
   then
     # not match etag; new download
@@ -209,6 +211,7 @@ rsvm_install()
   local dirname
   local url_prefix
   local LAST_VERSION
+  local RUSTUP_CHANNEL
 
   if [ ${1: -3} = '-rc' ]
   then
@@ -228,8 +231,15 @@ rsvm_install()
     else
       dirname=$1.`date "+%Y%m%d%H%M%S"`
     fi
+    if [[ $1 = "nightly" ]]
+    then
+      RUSTUP_CHANNEL=$1
+    else
+      RUSTUP_CHANNEL="beta"
+    fi
   else
     dirname=$1
+    RUSTUP_CHANNEL=$1
   fi
 
   rsvm_init_folder_structure $dirname
@@ -296,6 +306,65 @@ rsvm_install()
 
   cd "$SRC/rust-$target"
   sh install.sh --prefix=$DIST
+
+  if [ ! -f $DIST/lib/rustlib/multirust-channel-manifest.toml ]
+  then
+    echo "Downloading channel manifest ... "
+    rsvm_file_download \
+      "https://static.rust-lang.org/dist/channel-rust-${RUSTUP_CHANNEL}.toml" \
+      "multirust-channel-manifest.toml"
+    echo "done"
+
+    cp multirust-channel-manifest.toml $DIST/lib/rustlib/multirust-channel-manifest.toml
+  fi
+
+  if [ ! -f $DIST/lib/rustlib/multirust-config.toml ]
+  then
+    cat << EOF > $DIST/lib/rustlib/multirust-config.toml
+config_version = "1"
+
+[[components]]
+pkg = "rustc"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "rust-std"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "cargo"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "rust-docs"
+target = "$RSVM_PLATFORM"
+EOF
+  fi
+
+  if [ ! -f $DIST/bin/rustup ]
+  then
+    echo "Downloading rustup ... "
+    rsvm_file_download \
+      "https://static.rust-lang.org/rustup/dist/$RSVM_PLATFORM/rustup-init" \
+      "rustup"
+    echo "done"
+
+    cp rustup $DIST/bin/rustup
+    chmod +x $DIST/bin/rustup
+  fi
+
+  # FIXME move to use
+  # force reset
+  echo "Resetting rustup configures"
+  mkdir -p $HOME/.rustup/toolchains
+  ln -s $RSVM_DIR/current/dist $HOME/.rustup/toolchains/${RUSTUP_CHANNEL}-${RSVM_PLATFORM}
+  # clear settings
+  rm $HOME/.rustup/settings.toml
+  # not need this
+  $DIST/bin/rustup show > /dev/null
+  sed -i "1s/^/default_host_triple = \"${RSVM_PLATFORM}\"\n/" $HOME/.rustup/settings.toml
+  sed -i "2s/^/default_toolchain = \"${RUSTUP_CHANNEL}-${RSVM_PLATFORM}\"\n/" $HOME/.rustup/settings.toml
+  echo "done"
 
   echo ""
   echo "And we are done. Have fun using rust $dirname."
