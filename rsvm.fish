@@ -34,8 +34,9 @@ function rsvm_set_path
     end
   end
 
-  set p (rsvm_find_paths $r | head -n1)
-  set newpath $p $newpath
+  for p in (rsvm_find_paths $r)
+    set newpath $p $newpath
+  end
   rsvm_set $k $newpath
 end
 
