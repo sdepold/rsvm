@@ -101,6 +101,8 @@ rsvm_file_download()
     OPTS='-s'
   fi
 
+  #echo $1 $2
+
   if [ $(rsvm_check_etag $1 $2) = 0 ]
   then
     # not match etag; new download
@@ -124,7 +126,6 @@ rsvm_append_path()
   echo $newpath
 }
 
-export PATH=$(rsvm_append_path $PATH "$RSVM_DIR/current/dist/bin")
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
 export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
 export MANPATH=$(rsvm_append_path $MANPATH "$RSVM_DIR/current/dist/share/man")
@@ -135,6 +136,11 @@ then
 else
   unset RUST_SRC_PATH
 fi
+export CARGO_HOME="$RSVM_DIR/current/cargo"
+export RUSTUP_HOME="$RSVM_DIR/current/rustup"
+
+export PATH=$(rsvm_append_path $PATH "$RSVM_DIR/current/dist/bin")
+export PATH=$(rsvm_append_path $PATH "$CARGO_HOME/bin")
 
 rsvm_use()
 {
@@ -209,6 +215,7 @@ rsvm_install()
   local dirname
   local url_prefix
   local LAST_VERSION
+  local RUSTUP_CHANNEL
 
   if [ ${1: -3} = '-rc' ]
   then
@@ -228,13 +235,22 @@ rsvm_install()
     else
       dirname=$1.`date "+%Y%m%d%H%M%S"`
     fi
+    if [[ $1 = "nightly" ]]
+    then
+      RUSTUP_CHANNEL=$1
+    else
+      RUSTUP_CHANNEL="beta"
+    fi
   else
     dirname=$1
+    RUSTUP_CHANNEL=$1
   fi
 
   rsvm_init_folder_structure $dirname
   local SRC="$RSVM_DIR/versions/$dirname/src"
   local DIST="$RSVM_DIR/versions/$dirname/dist"
+  local CARGO="$RSVM_DIR/versions/$dirname/cargo"
+  local RUSTUP="$RSVM_DIR/versions/$dirname/rustup"
 
   cd $SRC
 
@@ -296,6 +312,63 @@ rsvm_install()
 
   cd "$SRC/rust-$target"
   sh install.sh --prefix=$DIST
+
+  if [ ! -f $DIST/lib/rustlib/multirust-channel-manifest.toml ]
+  then
+    echo "Downloading channel manifest ... "
+    rsvm_file_download \
+      "https://static.rust-lang.org/dist/channel-rust-${RUSTUP_CHANNEL}.toml" \
+      "multirust-channel-manifest.toml"
+    echo "done"
+
+    cp multirust-channel-manifest.toml $DIST/lib/rustlib/multirust-channel-manifest.toml
+  fi
+
+  if [ ! -f $DIST/lib/rustlib/multirust-config.toml ]
+  then
+    cat << EOF > $DIST/lib/rustlib/multirust-config.toml
+config_version = "1"
+
+[[components]]
+pkg = "rustc"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "rust-std"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "cargo"
+target = "$RSVM_PLATFORM"
+
+[[components]]
+pkg = "rust-docs"
+target = "$RSVM_PLATFORM"
+EOF
+  fi
+
+  if [ ! -f $DIST/bin/rustup ]
+  then
+    echo "Downloading rustup ... "
+    rsvm_file_download \
+      "https://static.rust-lang.org/rustup/dist/$RSVM_PLATFORM/rustup-init" \
+      "rustup"
+    echo "done"
+
+    cp rustup $DIST/bin/rustup
+    chmod +x $DIST/bin/rustup
+  fi
+
+  mkdir -p $RUSTUP/toolchains
+  ln -s $DIST $RUSTUP/toolchains/${RUSTUP_CHANNEL}-${RSVM_PLATFORM}
+  cat << EOF > $RUSTUP/settings.toml
+default_host_triple = "x86_64-unknown-linux-gnu"
+default_toolchain = "nightly-x86_64-unknown-linux-gnu"
+telemetry = false
+version = "12"
+
+[overrides]
+EOF
 
   echo ""
   echo "And we are done. Have fun using rust $dirname."
