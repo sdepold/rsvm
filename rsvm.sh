@@ -126,7 +126,6 @@ rsvm_append_path()
   echo $newpath
 }
 
-export PATH=$(rsvm_append_path $PATH "$RSVM_DIR/current/dist/bin")
 export LD_LIBRARY_PATH=$(rsvm_append_path $LD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
 export DYLD_LIBRARY_PATH=$(rsvm_append_path $DYLD_LIBRARY_PATH "$RSVM_DIR/current/dist/lib")
 export MANPATH=$(rsvm_append_path $MANPATH "$RSVM_DIR/current/dist/share/man")
@@ -137,6 +136,11 @@ then
 else
   unset RUST_SRC_PATH
 fi
+export CARGO_HOME="$RSVM_DIR/current/cargo"
+export RUSTUP_HOME="$RSVM_DIR/current/rustup"
+
+export PATH=$(rsvm_append_path $PATH "$RSVM_DIR/current/dist/bin")
+export PATH=$(rsvm_append_path $PATH "$CARGO_HOME/bin")
 
 rsvm_use()
 {
@@ -245,6 +249,8 @@ rsvm_install()
   rsvm_init_folder_structure $dirname
   local SRC="$RSVM_DIR/versions/$dirname/src"
   local DIST="$RSVM_DIR/versions/$dirname/dist"
+  local CARGO="$RSVM_DIR/versions/$dirname/cargo"
+  local RUSTUP="$RSVM_DIR/versions/$dirname/rustup"
 
   cd $SRC
 
@@ -353,18 +359,16 @@ EOF
     chmod +x $DIST/bin/rustup
   fi
 
-  # FIXME move to use
-  # force reset
-  echo "Resetting rustup configures"
-  mkdir -p $HOME/.rustup/toolchains
-  ln -s $RSVM_DIR/current/dist $HOME/.rustup/toolchains/${RUSTUP_CHANNEL}-${RSVM_PLATFORM}
-  # clear settings
-  rm $HOME/.rustup/settings.toml
-  # not need this
-  $DIST/bin/rustup show > /dev/null
-  sed -i "1s/^/default_host_triple = \"${RSVM_PLATFORM}\"\n/" $HOME/.rustup/settings.toml
-  sed -i "2s/^/default_toolchain = \"${RUSTUP_CHANNEL}-${RSVM_PLATFORM}\"\n/" $HOME/.rustup/settings.toml
-  echo "done"
+  mkdir -p $RUSTUP/toolchains
+  ln -s $DIST $RUSTUP/toolchains/${RUSTUP_CHANNEL}-${RSVM_PLATFORM}
+  cat << EOF > $RUSTUP/settings.toml
+default_host_triple = "x86_64-unknown-linux-gnu"
+default_toolchain = "nightly-x86_64-unknown-linux-gnu"
+telemetry = false
+version = "12"
+
+[overrides]
+EOF
 
   echo ""
   echo "And we are done. Have fun using rust $dirname."

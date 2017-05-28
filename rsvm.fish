@@ -74,6 +74,10 @@ function rsvm_mod_env
       rsvm_set_path MANPATH $p[2..-1]
     else if test $p[1] = RUST_SRC_PATH
       rsvm_set RUST_SRC_PATH $p[2..-1]
+    else if test $p[1] = CARGO_HOME
+      rsvm_set CARGO_HOME $p[2..-1]
+    else if test $p[1] = RUSTUP_HOME
+      rsvm_set RUSTUP_HOME $p[2..-1]
     end
   end
 
