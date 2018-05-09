@@ -94,7 +94,7 @@ function rsvm
   if echo $arg1 | grep -qE '^(use|install|deactivate)$'
     rsvm_mod_env $argv
     set s $status
-  else if test $arg1 = 'unload'
+  else if test $arg1 = 'unload' 2>/dev/null
     functions -e (functions | grep -E '^rsvm(_|$)')
   else
     bash -c "source ~/.rsvm/rsvm.sh && source $tmpold && rsvm $argv"
