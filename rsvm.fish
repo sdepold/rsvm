@@ -88,13 +88,13 @@ end
 function rsvm
   set -g tmpdir (mktemp -d 2>/dev/null; or mktemp -d -t 'rsvm-wrapper') # Linux || OS X
   set -g tmpold $tmpdir/oldenv
-  env | grep -E '^((rsvm|RUST)_|(MAN)?PATH=)' > $tmpold
+  env | grep -E '^((rsvm|RUST)_|(MAN)?PATH=)' | sed -E 's/\\\\?([ ()])/\\\\\\1/g' > $tmpold
 
   set -l arg1 $argv[1]
   if echo $arg1 | grep -qE '^(use|install|deactivate)$'
     rsvm_mod_env $argv
     set s $status
-  else if test $arg1 = 'unload'
+  else if test $arg1 = 'unload' 2>/dev/null
     functions -e (functions | grep -E '^rsvm(_|$)')
   else
     bash -c "source ~/.rsvm/rsvm.sh && source $tmpold && rsvm $argv"
