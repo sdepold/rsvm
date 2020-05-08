@@ -5,13 +5,13 @@ A version manager for rust.
 ## Installation
 
 ```console
-curl -L https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+curl -L https://raw.github.com/sdepold/rsvm/master/install.sh | bash
 ```
 
 or
 
 ```console
-wget -qO- https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+wget -qO- https://raw.github.com/sdepold/rsvm/master/install.sh | bash
 ```
 
 ### for fish-shell users
@@ -72,7 +72,7 @@ rsvm ls-channel stable
 ## Example: Install 0.12.0
 
 ```console
-curl https://raw.github.com/sdepold/rsvm/master/install.sh | sh
+curl https://raw.github.com/sdepold/rsvm/master/install.sh | bash
 source ~/.rsvm/rsvm.sh
 rsvm install 0.12.0
 rsvm use 0.12.0
